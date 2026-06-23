@@ -1,0 +1,1000 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fondeo Tracker — Impacto Digital</title>
+<style>
+:root {
+  --bg:     #03030a;
+  --s1:     #0a0a12;
+  --s2:     #0f0f1a;
+  --s3:     #141422;
+  --border: rgba(255,255,255,0.07);
+  --b2:     rgba(255,255,255,0.13);
+  --text:   #e2e0f0;
+  --muted:  #5a5870;
+  --green:  #00e5a0;
+  --red:    #ff4466;
+  --amber:  #ffb84d;
+  --blue:   #4d9fff;
+  --purple: #a07fff;
+  --mono: 'Courier New', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:-apple-system,'Segoe UI',sans-serif; font-size:13px; min-height:100vh; }
+
+/* TOPBAR */
+.topbar {
+  height:52px; background:var(--s1); border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between; padding:0 20px;
+  position:sticky; top:0; z-index:100;
+}
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-dot { width:8px; height:8px; border-radius:50%; background:var(--purple); animation:pulse 2s infinite; }
+.logo-name { font-size:14px; font-weight:700; }
+.logo-sub  { font-size:11px; color:var(--muted); margin-left:6px; font-family:var(--mono); }
+.top-right { display:flex; gap:10px; align-items:center; }
+
+/* LAYOUT */
+.page { max-width:1100px; margin:0 auto; padding:20px; }
+
+/* STATS */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; margin-bottom:18px; }
+.stat { background:var(--s1); border:1px solid var(--border); border-radius:10px; padding:13px 15px; }
+.stat-label { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:.8px; margin-bottom:5px; }
+.stat-val { font-size:22px; font-weight:700; font-family:var(--mono); }
+.stat-sub  { font-size:11px; color:var(--muted); margin-top:3px; }
+.c-green  { color:var(--green); }
+.c-red    { color:var(--red); }
+.c-amber  { color:var(--amber); }
+.c-blue   { color:var(--blue); }
+.c-purple { color:var(--purple); }
+
+/* CARDS GRID */
+.accounts-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:14px; margin-bottom:18px; }
+
+/* ACCOUNT CARD */
+.acc-card {
+  background:var(--s1); border:1px solid var(--border); border-radius:12px;
+  overflow:hidden; transition:.2s;
+}
+.acc-card.paired { border-color:rgba(160,127,255,0.35); }
+.acc-card.passed { border-color:rgba(0,229,160,0.5); }
+.acc-card.failed { border-color:rgba(255,68,102,0.4); opacity:.7; }
+.acc-card.at-risk { border-color:rgba(255,184,77,0.4); }
+
+.acc-head {
+  padding:12px 14px; display:flex; align-items:center; justify-content:space-between;
+  border-bottom:1px solid var(--border);
+}
+.acc-broker { font-size:14px; font-weight:700; }
+.acc-meta { font-size:11px; color:var(--muted); margin-top:2px; font-family:var(--mono); }
+.acc-status-pill {
+  font-size:10px; font-weight:700; font-family:var(--mono);
+  padding:3px 9px; border-radius:4px;
+}
+.pill-green  { background:rgba(0,229,160,.12); color:var(--green); }
+.pill-red    { background:rgba(255,68,102,.12); color:var(--red); }
+.pill-amber  { background:rgba(255,184,77,.12); color:var(--amber); }
+.pill-purple { background:rgba(160,127,255,.12); color:var(--purple); }
+.pill-gray   { background:rgba(255,255,255,.06); color:var(--muted); }
+.pill-blue   { background:rgba(77,159,255,.12); color:var(--blue); }
+
+.acc-body { padding:14px; }
+
+/* PROGRESS BAR DOBLE */
+.prog-section { margin-bottom:12px; }
+.prog-labels { display:flex; justify-content:space-between; margin-bottom:5px; font-size:11px; }
+.prog-track {
+  height:10px; background:var(--s3); border-radius:5px; overflow:hidden; position:relative;
+}
+.prog-fill {
+  height:100%; border-radius:5px; transition:width .5s ease;
+  position:absolute; top:0;
+}
+.prog-center-mark {
+  position:absolute; left:50%; top:0; width:1px; height:100%;
+  background:rgba(255,255,255,0.15);
+}
+
+/* Indicadores */
+.limits-row { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:12px; }
+.limit-box {
+  flex:1; min-width:80px; background:var(--s2); border-radius:6px;
+  padding:7px 8px; text-align:center; border:1px solid var(--border);
+}
+.limit-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; }
+.limit-val   { font-size:13px; font-weight:700; font-family:var(--mono); margin-top:3px; }
+
+/* INPUT PNL */
+.pnl-input-row { display:flex; gap:8px; align-items:center; margin-bottom:10px; }
+.pnl-label { font-size:11px; color:var(--muted); flex-shrink:0; }
+.pnl-input {
+  flex:1; background:var(--s3); border:1px solid var(--b2); border-radius:6px;
+  color:var(--text); font-family:var(--mono); font-size:13px; padding:5px 10px;
+  outline:none; transition:.15s;
+}
+.pnl-input:focus { border-color:var(--blue); }
+
+/* Dirección */
+.dir-toggle { display:flex; gap:6px; }
+.dir-btn {
+  flex:1; padding:6px; border-radius:6px; font-size:12px; font-weight:700;
+  cursor:pointer; border:1px solid var(--border); background:var(--s3);
+  color:var(--muted); transition:.15s; font-family:inherit;
+}
+.dir-btn.active-long  { background:rgba(0,229,160,.12); color:var(--green); border-color:rgba(0,229,160,.35); }
+.dir-btn.active-short { background:rgba(255,68,102,.12); color:var(--red);   border-color:rgba(255,68,102,.35); }
+
+/* Par tag */
+.pair-tag {
+  display:flex; align-items:center; gap:6px; margin-top:10px;
+  padding:7px 10px; background:var(--s2); border-radius:6px;
+  font-size:11px; color:var(--purple);
+  border:1px solid rgba(160,127,255,.2);
+}
+.pair-icon { font-size:14px; }
+
+/* BOTÓN ELIMINAR */
+.acc-footer {
+  padding:10px 14px; border-top:1px solid var(--border);
+  display:flex; justify-content:flex-end; gap:8px;
+}
+.btn-sm {
+  padding:5px 12px; border-radius:5px; font-size:11px; font-weight:600;
+  cursor:pointer; border:none; font-family:inherit; transition:.15s;
+}
+.btn-delete { background:rgba(255,68,102,.1); color:var(--red); border:1px solid rgba(255,68,102,.25); }
+.btn-delete:hover { background:rgba(255,68,102,.2); }
+.btn-pair   { background:rgba(160,127,255,.1); color:var(--purple); border:1px solid rgba(160,127,255,.25); }
+.btn-pair:hover   { background:rgba(160,127,255,.2); }
+
+/* BOTONES PRINCIPALES */
+.btn-main {
+  padding:9px 18px; border-radius:7px; font-size:13px; font-weight:600;
+  cursor:pointer; border:none; font-family:inherit; transition:.15s;
+}
+.btn-add    { background:var(--purple); color:#fff; }
+.btn-add:hover  { filter:brightness(1.15); }
+.btn-alert  { background:var(--s2); color:var(--amber); border:1px solid rgba(255,184,77,.3); }
+
+/* PANEL NUEVO */
+.add-panel {
+  background:var(--s1); border:1px solid var(--b2); border-radius:12px;
+  padding:20px; margin-bottom:18px; display:none;
+}
+.add-panel.visible { display:block; }
+.add-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.field-group { display:flex; flex-direction:column; gap:5px; }
+.field-label { font-size:11px; color:var(--muted); }
+.field-input {
+  background:var(--s2); border:1px solid var(--border); border-radius:6px;
+  color:var(--text); font-size:13px; padding:8px 11px; outline:none;
+  font-family:var(--mono); transition:.15s;
+}
+.field-input:focus { border-color:var(--purple); }
+.add-footer { display:flex; gap:10px; margin-top:14px; justify-content:flex-end; }
+
+/* LOG */
+.log-card { background:var(--s1); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.log-head { padding:11px 14px; border-bottom:1px solid var(--border); font-size:12px; font-weight:600; display:flex; justify-content:space-between; align-items:center; }
+.log-body { padding:10px 14px; max-height:160px; overflow-y:auto; }
+.log-line { display:flex; gap:10px; padding:5px 0; border-bottom:1px solid var(--border); font-size:11px; }
+.log-line:last-child { border-bottom:none; }
+.log-t { font-family:var(--mono); color:var(--muted); flex-shrink:0; }
+
+/* ALERTA SISTÉMICA */
+.alerta-box {
+  background:rgba(255,184,77,.08); border:1px solid rgba(255,184,77,.3);
+  border-radius:10px; padding:14px 16px; margin-bottom:18px;
+  font-size:12px; color:var(--amber); display:none;
+}
+.alerta-box.visible { display:block; }
+
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.3} }
+@keyframes in { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+.in { animation:in .3s ease; }
+
+::-webkit-scrollbar { width:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--b2); border-radius:2px; }
+
+/* ESTRATEGIA 3×4 */
+.strat-panel {
+  background:var(--s1); border:1px solid rgba(77,159,255,.25); border-radius:12px;
+  padding:20px; margin-bottom:18px;
+}
+.strat-header {
+  display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:10px;
+}
+.strat-title { font-size:14px; font-weight:700; color:var(--blue); }
+.strat-sub { font-size:11px; color:var(--muted); margin-top:2px; }
+.phase-badge {
+  font-size:11px; font-weight:700; font-family:var(--mono);
+  padding:4px 12px; border-radius:6px;
+}
+.phase-1 { background:rgba(160,127,255,.15); color:var(--purple); }
+.phase-2 { background:rgba(255,184,77,.15);  color:var(--amber); }
+.phase-3 { background:rgba(0,229,160,.15);   color:var(--green); }
+
+.matrix-grid {
+  display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px;
+}
+.broker-col {
+  background:var(--s2); border:1px solid var(--border); border-radius:9px;
+  padding:12px; text-align:center;
+}
+.broker-col-name {
+  font-size:12px; font-weight:700; margin-bottom:8px; font-family:var(--mono); color:var(--blue);
+}
+.matrix-acc {
+  padding:7px 10px; border-radius:6px; margin-bottom:7px; font-size:11px; font-weight:600;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.matrix-acc:last-child { margin-bottom:0; }
+.mat-long  { background:rgba(0,229,160,.1);  color:var(--green); border:1px solid rgba(0,229,160,.25); }
+.mat-short { background:rgba(255,68,102,.1); color:var(--red);   border:1px solid rgba(255,68,102,.25); }
+.mat-par   { font-size:9px; opacity:.7; font-family:var(--mono); }
+
+.pair-arrows {
+  display:flex; align-items:center; justify-content:center;
+  gap:14px; margin-bottom:16px; flex-wrap:wrap;
+}
+.pair-row {
+  display:flex; align-items:center; gap:8px; background:var(--s2);
+  border:1px solid rgba(160,127,255,.25); border-radius:8px; padding:8px 14px;
+  font-size:11px; font-family:var(--mono);
+}
+.pair-row .win  { color:var(--green); font-weight:700; }
+.pair-row .loss { color:var(--red);   font-weight:700; }
+.pair-arrow { color:var(--purple); font-size:14px; }
+
+.calc-section {
+  display:grid; grid-template-columns:repeat(4,1fr); gap:10px;
+  background:var(--s2); border:1px solid var(--border); border-radius:9px; padding:14px;
+  margin-bottom:14px;
+}
+.calc-box { text-align:center; }
+.calc-label { font-size:9px; color:var(--muted); text-transform:uppercase; letter-spacing:.6px; margin-bottom:5px; }
+.calc-val   { font-size:18px; font-weight:700; font-family:var(--mono); }
+.calc-sub   { font-size:10px; color:var(--muted); margin-top:2px; }
+
+.strat-rules {
+  display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:14px;
+}
+.rule-box {
+  background:var(--s2); border-radius:8px; padding:11px 13px; font-size:11px;
+  border-left:3px solid;
+}
+.rule-win  { border-color:var(--green); }
+.rule-lose { border-color:var(--red); }
+.rule-title { font-size:10px; font-weight:700; text-transform:uppercase; letter-spacing:.6px; margin-bottom:6px; }
+.rule-win  .rule-title { color:var(--green); }
+.rule-lose .rule-title { color:var(--red); }
+.rule-item { color:var(--muted); line-height:1.7; }
+
+.strat-cta {
+  display:flex; gap:10px; flex-wrap:wrap;
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay" style="display:none;position:fixed;inset:0;background:rgba(3,3,10,.95);z-index:999;align-items:center;justify-content:center;backdrop-filter:blur(8px);">
+  <div style="background:var(--s1);border:1px solid var(--b2);border-radius:16px;padding:36px;width:340px;text-align:center;">
+    <div style="width:10px;height:10px;border-radius:50%;background:var(--green);margin:0 auto 16px;animation:pulse 2s infinite;"></div>
+    <div style="font-size:18px;font-weight:800;margin-bottom:6px;">Fondeo Garantizado</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:24px;">Accede a tu dashboard de cobertura</div>
+    <input id="l-email" type="email" placeholder="tu@email.com"
+      style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px 13px;outline:none;margin-bottom:10px;font-family:inherit;" />
+    <input id="l-pass" type="password" placeholder="Contraseña"
+      style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:13px;padding:10px 13px;outline:none;margin-bottom:16px;font-family:inherit;" />
+    <button onclick="doLogin()" style="width:100%;background:var(--green);color:#000;font-weight:700;font-size:14px;padding:11px;border-radius:8px;border:none;cursor:pointer;margin-bottom:10px;">Entrar</button>
+    <button onclick="doRegistro()" style="width:100%;background:transparent;color:var(--muted);font-size:12px;padding:8px;border-radius:8px;border:1px solid var(--border);cursor:pointer;">Crear cuenta nueva</button>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-name">Fondeo Tracker</span>
+    <span class="logo-sub">Gestión de cuentas de fondeo · Estrategia de cobertura</span>
+  </div>
+  <div class="top-right">
+    <button class="btn-main" style="background:rgba(0,229,160,.1);color:var(--green);border:1px solid rgba(0,229,160,.25);font-size:12px;" onclick="cargarSenal()">⚡ Señal BTC</button>
+    <button class="btn-main" style="background:rgba(77,159,255,.15);color:var(--blue);border:1px solid rgba(77,159,255,.3);" onclick="toggleStrat()">Estrategia 3×4</button>
+    <button class="btn-main btn-add" onclick="mostrarPanel()">+ Nueva cuenta</button>
+    <button onclick="localStorage.removeItem('fg_token');location.reload();" style="background:transparent;border:1px solid var(--border);color:var(--muted);font-size:11px;padding:6px 12px;border-radius:6px;cursor:pointer;">Salir</button>
+  </div>
+</div>
+
+<div class="page">
+
+  <!-- ESTRATEGIA 3×4 -->
+  <div class="strat-panel" id="strat-panel" style="display:none;">
+    <div class="strat-header">
+      <div>
+        <div class="strat-title">Estrategia de Cobertura 3 Brokers × 4 Exámenes</div>
+        <div class="strat-sub">Garantía matemática: mínimo 2 cuentas fondeadas de 4 exámenes</div>
+      </div>
+      <span class="phase-badge phase-1" id="phase-badge">FASE 1 — COBERTURA ACTIVA</span>
+    </div>
+
+    <!-- MATRIZ DE BROKERS -->
+    <div class="matrix-grid">
+      <div class="broker-col">
+        <div class="broker-col-name" id="m-name-a">BROKER A</div>
+        <div class="matrix-acc mat-long">
+          <span>Cuenta A1</span><span class="mat-par">▲ LONG · Par 1</span>
+        </div>
+        <div class="matrix-acc mat-long">
+          <span>Cuenta A2</span><span class="mat-par">▲ LONG · Par 2</span>
+        </div>
+      </div>
+      <div class="broker-col">
+        <div class="broker-col-name" id="m-name-b">BROKER B</div>
+        <div class="matrix-acc mat-short">
+          <span>Cuenta B1</span><span class="mat-par">▼ SHORT · Par 1</span>
+        </div>
+        <div class="matrix-acc" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);justify-content:center;padding:7px;">
+          — sin cuenta —
+        </div>
+      </div>
+      <div class="broker-col">
+        <div class="broker-col-name" id="m-name-c">BROKER C</div>
+        <div class="matrix-acc mat-short">
+          <span>Cuenta C1</span><span class="mat-par">▼ SHORT · Par 2</span>
+        </div>
+        <div class="matrix-acc" style="background:var(--s3);border:1px solid var(--border);color:var(--muted);justify-content:center;padding:7px;">
+          — sin cuenta —
+        </div>
+      </div>
+    </div>
+
+    <!-- POR QUÉ FUNCIONA -->
+    <div class="pair-arrows">
+      <div class="pair-row">
+        <span class="win">A1 LONG</span>
+        <span class="pair-arrow">⇌</span>
+        <span class="loss">B1 SHORT</span>
+        <span style="color:var(--muted);margin-left:8px;">→ mercado sube: A1 gana · baja: B1 gana</span>
+      </div>
+      <div class="pair-row">
+        <span class="win">A2 LONG</span>
+        <span class="pair-arrow">⇌</span>
+        <span class="loss">C1 SHORT</span>
+        <span style="color:var(--muted);margin-left:8px;">→ mercado sube: A2 gana · baja: C1 gana</span>
+      </div>
+    </div>
+
+    <!-- CALCULADORA -->
+    <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;">Calculadora — por par (objetivo 8%, ratio 4:1)</div>
+    <div class="calc-section">
+      <div class="calc-box">
+        <div class="calc-label">Riesgo/trade</div>
+        <div class="calc-val c-amber">1%</div>
+        <div class="calc-sub">del capital</div>
+      </div>
+      <div class="calc-box">
+        <div class="calc-label">Trades para pasar</div>
+        <div class="calc-val c-green">2</div>
+        <div class="calc-sub">ganadores seguidos</div>
+      </div>
+      <div class="calc-box">
+        <div class="calc-label">DD cuenta perdedora</div>
+        <div class="calc-val c-red">−2%</div>
+        <div class="calc-sub">de 8% límite → seguro</div>
+      </div>
+      <div class="calc-box">
+        <div class="calc-label">Garantía mínima</div>
+        <div class="calc-val c-purple">2/4</div>
+        <div class="calc-sub">cuentas fondeadas</div>
+      </div>
+    </div>
+
+    <!-- REGLAS OPERATIVAS -->
+    <div class="strat-rules">
+      <div class="rule-box rule-win">
+        <div class="rule-title">Cuenta ganadora (avanza al objetivo)</div>
+        <div class="rule-item">
+          ✔ Sigue operando sin cambios<br>
+          ✔ 1% riesgo · ratio 4:1 (SL/TP)<br>
+          ✔ Mínimo 1 operación por día de trading exigido<br>
+          ✔ Para en cuanto superas el +8%
+        </div>
+      </div>
+      <div class="rule-box rule-lose">
+        <div class="rule-title">Cuenta perdedora (se aleja del objetivo)</div>
+        <div class="rule-item">
+          ✔ DETÉN operaciones si llega a −4% DD<br>
+          ✔ Deja que expire el tiempo mínimo<br>
+          ✔ Cuando la par pase, retoma agresivo<br>
+          ✔ Si rebota puedes recuperarla sola
+        </div>
+      </div>
+    </div>
+
+    <!-- FASES -->
+    <div style="background:var(--s2);border-radius:8px;padding:12px 14px;margin-bottom:14px;font-size:11px;line-height:1.9;border:1px solid var(--border);">
+      <span style="color:var(--purple);font-weight:700;">FASE 1 — Cobertura activa:</span>
+      <span style="color:var(--muted)"> Abre los 4 exámenes simultáneamente. A1+A2 LONG, B1+C1 SHORT. Opera en los mismos activos al mismo tiempo.</span><br>
+      <span style="color:var(--amber);font-weight:700;">FASE 2 — Recuperación:</span>
+      <span style="color:var(--muted)"> Las cuentas ganadoras ya pasaron (+8%). Las perdedoras están en −2%. Intenta recuperarlas operando agresivo (2% riesgo).</span><br>
+      <span style="color:var(--green);font-weight:700;">FASE 3 — Fondeado:</span>
+      <span style="color:var(--muted)"> Mínimo 2 cuentas fondeadas activas. Usa los splits de beneficios para pagar las fees de los próximos exámenes.</span>
+    </div>
+
+    <div class="strat-cta">
+      <button class="btn-main" style="background:rgba(77,159,255,.15);color:var(--blue);border:1px solid rgba(77,159,255,.3);" onclick="cargarEstrategia()">
+        ⚡ Cargar 4 cuentas ejemplo (10k · 8% target)
+      </button>
+      <button class="btn-sm" onclick="toggleStrat()" style="background:var(--s2);color:var(--muted);border:1px solid var(--border);">Cerrar</button>
+    </div>
+  </div>
+
+  <!-- SEÑAL EN TIEMPO REAL -->
+  <div id="senal-box" style="display:none;background:var(--s1);border:1px solid rgba(0,229,160,.25);border-radius:12px;padding:16px;margin-bottom:18px;"></div>
+
+  <!-- ESTADÍSTICAS GLOBALES -->
+  <div class="stats-row" id="stats-row">
+    <div class="stat">
+      <div class="stat-label">Cuentas activas</div>
+      <div class="stat-val c-purple" id="s-activas">0</div>
+      <div class="stat-sub">En proceso de fondeo</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Cuentas aprobadas</div>
+      <div class="stat-val c-green" id="s-aprobadas">0</div>
+      <div class="stat-sub">Challenge superado</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Coste total invertido</div>
+      <div class="stat-val c-amber" id="s-coste">€0</div>
+      <div class="stat-sub">Fees de challenges</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Pares activos</div>
+      <div class="stat-val c-blue" id="s-pares">0</div>
+      <div class="stat-sub">Long/Short vinculados</div>
+    </div>
+  </div>
+
+  <!-- ALERTA SISTÉMICA -->
+  <div class="alerta-box" id="alerta-box" id="alerta-global"></div>
+
+  <!-- PANEL AÑADIR CUENTA -->
+  <div class="add-panel" id="add-panel">
+    <div style="font-size:13px;font-weight:600;margin-bottom:14px;">Nueva cuenta de fondeo</div>
+    <div class="add-grid">
+      <div class="field-group">
+        <label class="field-label">Nombre del broker / firma</label>
+        <input class="field-input" id="f-broker" placeholder="FTMO, The5ers, Apex..." />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Fee pagado (€)</label>
+        <input class="field-input" id="f-fee" type="number" placeholder="199" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Capital del challenge (€)</label>
+        <input class="field-input" id="f-capital" type="number" placeholder="10000" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Objetivo de ganancia (%)</label>
+        <input class="field-input" id="f-target" type="number" placeholder="8" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Máx. drawdown permitido (%)</label>
+        <input class="field-input" id="f-dd" type="number" placeholder="8" />
+      </div>
+      <div class="field-group">
+        <label class="field-label">Límite pérdida diaria (%)</label>
+        <input class="field-input" id="f-daily" type="number" placeholder="5" />
+      </div>
+    </div>
+    <div class="add-footer">
+      <button class="btn-sm" onclick="ocultarPanel()" style="background:var(--s2);color:var(--muted);border:1px solid var(--border)">Cancelar</button>
+      <button class="btn-main btn-add" onclick="añadirCuenta()">Crear cuenta</button>
+    </div>
+  </div>
+
+  <!-- GRID DE CUENTAS -->
+  <div class="accounts-grid" id="accounts-grid">
+    <div style="color:var(--muted);font-size:13px;padding:30px;grid-column:1/-1;text-align:center;">
+      Sin cuentas todavía — pulsa <strong style="color:var(--text)">+ Nueva cuenta</strong> para empezar
+    </div>
+  </div>
+
+  <!-- LOG -->
+  <div class="log-card">
+    <div class="log-head">
+      <span>Registro de eventos</span>
+      <span style="font-size:10px;color:var(--muted);font-family:var(--mono)" id="log-count">0 eventos</span>
+    </div>
+    <div class="log-body" id="log-body">
+      <div class="log-line">
+        <span class="log-t">--:--:--</span>
+        <span style="color:var(--muted)">Sistema iniciado — añade tus cuentas de fondeo</span>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /page -->
+
+<script>
+// ═══════════════════════════════════════════
+//  API — conectado al backend FastAPI
+// ═══════════════════════════════════════════
+const API = 'http://localhost:5003';
+
+async function apiCall(method, path, body = null) {
+  const token = localStorage.getItem('fg_token');
+  const opts  = {
+    method,
+    headers: { 'Content-Type': 'application/json', ...(token ? { 'Authorization': `Bearer ${token}` } : {}) },
+    ...(body ? { body: JSON.stringify(body) } : {}),
+  };
+  const res = await fetch(API + path, opts);
+  if (res.status === 401) { mostrarLogin(); return null; }
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    log(`Error API: ${err.detail || res.status}`, 'red');
+    return null;
+  }
+  return res.json();
+}
+
+// ─── AUTH ────────────────────────────────────
+let usuario = null;
+
+function mostrarLogin() {
+  document.getElementById('login-overlay').style.display = 'flex';
+}
+function ocultarLogin() {
+  document.getElementById('login-overlay').style.display = 'none';
+}
+
+async function doLogin() {
+  const email = document.getElementById('l-email').value.trim();
+  const pass  = document.getElementById('l-pass').value.trim();
+  const res   = await apiCall('POST', '/auth/login', { email, password: pass });
+  if (res?.token) {
+    localStorage.setItem('fg_token', res.token);
+    localStorage.setItem('fg_nombre', res.nombre);
+    usuario = res;
+    ocultarLogin();
+    await cargarCuentas();
+    log(`Bienvenido, ${res.nombre} — Plan ${res.plan.toUpperCase()}`, 'green');
+  }
+}
+
+async function doRegistro() {
+  const email  = document.getElementById('l-email').value.trim();
+  const pass   = document.getElementById('l-pass').value.trim();
+  const nombre = prompt('Tu nombre:') || 'Usuario';
+  const res    = await apiCall('POST', '/auth/registro', { email, password: pass, nombre });
+  if (res?.token) {
+    localStorage.setItem('fg_token', res.token);
+    localStorage.setItem('fg_nombre', res.nombre);
+    usuario = res;
+    ocultarLogin();
+    await cargarCuentas();
+    log(`Cuenta creada — Bienvenido, ${res.nombre}`, 'green');
+  }
+}
+
+// ═══════════════════════════════════════════
+//  ESTADO LOCAL (sincronizado con API)
+// ═══════════════════════════════════════════
+let cuentas = [];
+let logs    = [];
+let nextId  = 1;
+
+// ─── CARGAR DESDE API ────────────────────────
+async function cargarCuentas() {
+  const data = await apiCall('GET', '/cuentas');
+  if (data) {
+    cuentas = data.map(c => ({
+      id:      c.id,
+      broker:  c.broker,
+      capital: c.capital,
+      fee:     c.fee,
+      target:  c.target,
+      dd:      c.dd_max,
+      daily:   c.daily_max,
+      pnl:     c.pnl || 0,
+      dir:     c.direccion,
+      parId:   c.par_id,
+      estado:  c.estado,
+    }));
+    render(); actualizarFase();
+  }
+}
+
+// ─── GUARDAR (POST a API) ────────────────────
+async function guardar() {
+  // Los cambios ya se envían individualmente en cada operación
+  // Esta función existe para compatibilidad y refresca los datos
+  await cargarCuentas();
+}
+
+// ─── ESTADO DE UNA CUENTA ───────────────────
+function calcularEstado(c) {
+  const pnl = c.pnl || 0;
+  if (c.estado === 'aprobada') return 'aprobada';
+  if (c.estado === 'fallida')  return 'fallida';
+  if (pnl >= c.target)        return 'aprobada';
+  if (pnl <= -c.dd)           return 'fallida';
+  if (pnl <= -(c.dd * 0.6))   return 'at-risk';   // 60% del drawdown → alerta
+  return 'activa';
+}
+
+function labelEstado(e) {
+  return { aprobada:'APROBADA', fallida:'FALLIDA', 'at-risk':'EN RIESGO', activa:'ACTIVA' }[e] || e;
+}
+function pillEstado(e) {
+  return { aprobada:'pill-green', fallida:'pill-red', 'at-risk':'pill-amber', activa:'pill-purple' }[e] || 'pill-gray';
+}
+
+// ─── RENDER ─────────────────────────────────
+function render() {
+  const grid = document.getElementById('accounts-grid');
+
+  if (!cuentas.length) {
+    grid.innerHTML = `<div style="color:var(--muted);font-size:13px;padding:30px;grid-column:1/-1;text-align:center;">
+      Sin cuentas todavía — pulsa <strong style="color:var(--text)">+ Nueva cuenta</strong> para empezar
+    </div>`;
+    actualizarStats();
+    return;
+  }
+
+  grid.innerHTML = cuentas.map(c => renderCard(c)).join('');
+  actualizarStats();
+  verificarAlertas();
+}
+
+function renderCard(c) {
+  const pnl    = c.pnl || 0;
+  const estado = calcularEstado(c);
+
+  // Barra de progreso hacia el objetivo (positivo)
+  const pctTarget = Math.min(100, Math.max(0, (pnl / c.target) * 100));
+  // Barra de peligro hacia el límite (negativo)
+  const pctDD     = pnl < 0 ? Math.min(100, Math.abs(pnl) / c.dd * 100) : 0;
+
+  const colorProg = pnl >= 0 ? 'var(--green)' : 'var(--red)';
+  const pnlColor  = pnl > 0 ? 'c-green' : pnl < 0 ? 'c-red' : '';
+
+  const parInfo = c.parId
+    ? `<div class="pair-tag"><span class="pair-icon">⇌</span>Par con: <strong>${nombrePor(c.parId)}</strong> · ${c.dir === 'long' ? '▲ LONG' : '▼ SHORT'}</div>`
+    : c.dir
+      ? `<div class="pair-tag" style="color:var(--muted);border-color:var(--border)">
+           <span>${c.dir === 'long' ? '▲' : '▼'}</span> Sin par asignado todavía</div>`
+      : '';
+
+  return `<div class="acc-card ${estado} in" id="card-${c.id}">
+    <div class="acc-head">
+      <div>
+        <div class="acc-broker">${c.broker}</div>
+        <div class="acc-meta">€${c.capital.toLocaleString()} · Fee €${c.fee}</div>
+      </div>
+      <span class="acc-status-pill ${pillEstado(estado)}">${labelEstado(estado)}</span>
+    </div>
+    <div class="acc-body">
+
+      <!-- PNL ACTUAL -->
+      <div class="limits-row">
+        <div class="limit-box">
+          <div class="limit-label">P&L actual</div>
+          <div class="limit-val ${pnlColor}">${pnl >= 0 ? '+' : ''}${pnl.toFixed(2)}%</div>
+        </div>
+        <div class="limit-box">
+          <div class="limit-label">Objetivo</div>
+          <div class="limit-val c-green">+${c.target}%</div>
+        </div>
+        <div class="limit-box">
+          <div class="limit-label">Límite DD</div>
+          <div class="limit-val c-red">-${c.dd}%</div>
+        </div>
+        <div class="limit-box">
+          <div class="limit-label">Diario</div>
+          <div class="limit-val c-amber">-${c.daily}%</div>
+        </div>
+      </div>
+
+      <!-- BARRA OBJETIVO -->
+      <div class="prog-section">
+        <div class="prog-labels">
+          <span style="color:var(--muted)">Hacia objetivo</span>
+          <span class="c-green">${pctTarget.toFixed(0)}%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-fill" style="background:var(--green);width:${pctTarget}%"></div>
+        </div>
+      </div>
+
+      <!-- BARRA DRAWDOWN -->
+      <div class="prog-section">
+        <div class="prog-labels">
+          <span style="color:var(--muted)">Drawdown consumido</span>
+          <span class="${pctDD > 60 ? 'c-red' : 'c-amber'}">${pctDD.toFixed(0)}%</span>
+        </div>
+        <div class="prog-track">
+          <div class="prog-fill" style="background:${pctDD > 75 ? 'var(--red)' : pctDD > 50 ? 'var(--amber)' : 'var(--muted)'};width:${pctDD}%"></div>
+        </div>
+      </div>
+
+      <!-- INPUT PNL -->
+      <div class="pnl-input-row">
+        <span class="pnl-label">P&L %</span>
+        <input class="pnl-input" type="number" step="0.1"
+          value="${pnl}"
+          onchange="actualizarPnl(${c.id}, parseFloat(this.value))"
+          placeholder="0.0" />
+      </div>
+
+      <!-- DIRECCIÓN -->
+      <div class="dir-toggle">
+        <button class="dir-btn ${c.dir==='long'?'active-long':''}"
+          onclick="setDir(${c.id},'long')">▲ LONG</button>
+        <button class="dir-btn ${c.dir==='short'?'active-short':''}"
+          onclick="setDir(${c.id},'short')">▼ SHORT</button>
+      </div>
+
+      ${parInfo}
+    </div>
+    <div class="acc-footer">
+      <button class="btn-sm btn-pair" onclick="abrirModalPar(${c.id})">⇌ Emparejar</button>
+      <button class="btn-sm btn-delete" onclick="eliminarCuenta(${c.id})">✕ Eliminar</button>
+    </div>
+  </div>`;
+}
+
+function nombrePor(id) {
+  const c = cuentas.find(x => x.id === id);
+  return c ? c.broker : '?';
+}
+
+// ─── STATS ──────────────────────────────────
+function actualizarStats() {
+  const activas   = cuentas.filter(c => ['activa','at-risk'].includes(calcularEstado(c))).length;
+  const aprobadas = cuentas.filter(c => calcularEstado(c) === 'aprobada').length;
+  const coste     = cuentas.reduce((s, c) => s + (c.fee || 0), 0);
+  const pares     = new Set(cuentas.filter(c => c.parId).map(c => [c.id, c.parId].sort().join('-'))).size;
+
+  document.getElementById('s-activas').textContent   = activas;
+  document.getElementById('s-aprobadas').textContent = aprobadas;
+  document.getElementById('s-coste').textContent     = `€${coste}`;
+  document.getElementById('s-pares').textContent     = pares;
+}
+
+// ─── ALERTAS ────────────────────────────────
+function verificarAlertas() {
+  const alertas = [];
+  cuentas.forEach(c => {
+    const e = calcularEstado(c);
+    if (e === 'at-risk') {
+      const margen = c.dd + (c.pnl || 0);
+      alertas.push(`⚠️  ${c.broker}: drawdown al ${(Math.abs(c.pnl||0)/c.dd*100).toFixed(0)}% — quedan ${margen.toFixed(1)}% antes de quema`);
+    }
+    if (e === 'aprobada' && !c._notifAprobada) {
+      alertas.push(`✅  ${c.broker}: ¡CUENTA APROBADA! Objetivo +${c.target}% superado`);
+      c._notifAprobada = true;
+    }
+  });
+
+  const el = document.getElementById('alerta-box');
+  if (alertas.length) {
+    el.innerHTML = alertas.join('<br>');
+    el.classList.add('visible');
+  } else {
+    el.classList.remove('visible');
+  }
+}
+
+// ─── ACCIONES ───────────────────────────────
+function actualizarPnl(id, valor) {
+  const c = cuentas.find(x => x.id === id);
+  if (!c) return;
+  const antes = calcularEstado(c);
+  c.pnl = valor;
+  const ahora = calcularEstado(c);
+  if (antes !== ahora) {
+    log(`${c.broker}: cambio de estado ${labelEstado(antes)} → ${labelEstado(ahora)}`,
+        ahora === 'aprobada' ? 'green' : ahora === 'fallida' ? 'red' : 'amber');
+  }
+  guardar(); render();
+}
+
+function setDir(id, dir) {
+  const c = cuentas.find(x => x.id === id);
+  if (!c) return;
+  c.dir = dir;
+  log(`${c.broker}: dirección → ${dir.toUpperCase()}`, 'blue');
+  guardar(); render();
+}
+
+function abrirModalPar(id) {
+  const otras = cuentas.filter(x => x.id !== id);
+  if (!otras.length) { alert('Necesitas al menos 2 cuentas para emparejar.'); return; }
+  const opciones = otras.map(c => `• ID ${c.id}: ${c.broker}`).join('\n');
+  const input = prompt(`¿Con qué cuenta emparejar ${cuentas.find(x=>x.id===id).broker}?\n\n${opciones}\n\nEscribe el ID:`);
+  if (!input) return;
+  const parId = parseInt(input);
+  if (!cuentas.find(x => x.id === parId)) { alert('ID no encontrado.'); return; }
+
+  const c    = cuentas.find(x => x.id === id);
+  const cPar = cuentas.find(x => x.id === parId);
+  c.parId    = parId;
+  cPar.parId = id;
+
+  // Asignar automáticamente direcciones contrarias
+  if (!c.dir && !cPar.dir) {
+    c.dir    = 'long';
+    cPar.dir = 'short';
+    log(`Auto-asignado: ${c.broker}→LONG · ${cPar.broker}→SHORT`, 'purple');
+  } else if (c.dir && !cPar.dir) {
+    cPar.dir = c.dir === 'long' ? 'short' : 'long';
+    log(`Auto-asignado: ${cPar.broker}→${cPar.dir.toUpperCase()}`, 'purple');
+  }
+
+  log(`Par creado: ${c.broker} ⇌ ${cPar.broker} (${c.dir?.toUpperCase() || '?'} / ${cPar.dir?.toUpperCase() || '?'})`, 'purple');
+  guardar(); render();
+}
+
+async function eliminarCuenta(id) {
+  const c = cuentas.find(x => x.id === id);
+  if (!confirm(`¿Eliminar cuenta ${c?.broker}?`)) return;
+  const res = await apiCall('DELETE', `/cuentas/${id}`);
+  if (res) {
+    log(`Cuenta ${c?.broker} eliminada`, 'red');
+    await guardar();
+  }
+}
+
+// ─── AÑADIR CUENTA ──────────────────────────
+function mostrarPanel()  { document.getElementById('add-panel').classList.add('visible'); }
+function ocultarPanel()  { document.getElementById('add-panel').classList.remove('visible'); }
+
+async function añadirCuenta() {
+  const broker  = document.getElementById('f-broker').value.trim();
+  const fee     = parseFloat(document.getElementById('f-fee').value)     || 0;
+  const capital = parseFloat(document.getElementById('f-capital').value) || 10000;
+  const target  = parseFloat(document.getElementById('f-target').value)  || 8;
+  const dd      = parseFloat(document.getElementById('f-dd').value)      || 10;
+  const daily   = parseFloat(document.getElementById('f-daily').value)   || 5;
+
+  if (!broker) { alert('Escribe el nombre del broker.'); return; }
+
+  const res = await apiCall('POST', '/cuentas', {
+    broker, fee, capital, target, dd_max: dd, daily_max: daily
+  });
+  if (res) {
+    log(`Nueva cuenta: ${broker} | €${capital.toLocaleString()} | Obj +${target}% | DD -${dd}%`, 'green');
+    await guardar(); ocultarPanel();
+    ['f-broker','f-fee','f-capital','f-target','f-dd','f-daily'].forEach(id => {
+      document.getElementById(id).value = '';
+    });
+  }
+}
+
+// ─── LOG ────────────────────────────────────
+function log(msg, color = 'muted') {
+  const h = new Date().toLocaleTimeString('es-ES', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+  const colorMap = { green:'var(--green)', red:'var(--red)', amber:'var(--amber)',
+                     blue:'var(--blue)', purple:'var(--purple)', muted:'var(--muted)' };
+  logs.unshift({ h, msg, color: colorMap[color] || colorMap.muted });
+  if (logs.length > 50) logs.pop();
+  const el = document.getElementById('log-body');
+  el.innerHTML = logs.map(l =>
+    `<div class="log-line">
+      <span class="log-t">${l.h}</span>
+      <span style="color:${l.color}">${l.msg}</span>
+    </div>`
+  ).join('');
+  document.getElementById('log-count').textContent = `${logs.length} eventos`;
+}
+
+// ─── ESTRATEGIA 3×4 ─────────────────────────
+function toggleStrat() {
+  const p = document.getElementById('strat-panel');
+  p.style.display = p.style.display === 'none' ? 'block' : 'none';
+  actualizarFase();
+}
+
+function actualizarFase() {
+  const badge = document.getElementById('phase-badge');
+  if (!badge) return;
+  const aprobadas = cuentas.filter(c => calcularEstado(c) === 'aprobada').length;
+  if (aprobadas === 0) {
+    badge.textContent = 'FASE 1 — COBERTURA ACTIVA';
+    badge.className = 'phase-badge phase-1';
+  } else if (aprobadas < 2) {
+    badge.textContent = 'FASE 2 — RECUPERACIÓN';
+    badge.className = 'phase-badge phase-2';
+  } else {
+    badge.textContent = 'FASE 3 — FONDEADO ✓';
+    badge.className = 'phase-badge phase-3';
+  }
+}
+
+function cargarEstrategia() {
+  if (cuentas.length > 0 && !confirm('Esto añadirá 4 cuentas de ejemplo. ¿Continuar?')) return;
+
+  const brokers = [
+    { broker:'Broker A — Cuenta 1', fee:199, capital:10000, target:8, dd:8, daily:5, dir:'long'  },
+    { broker:'Broker A — Cuenta 2', fee:199, capital:10000, target:8, dd:8, daily:5, dir:'long'  },
+    { broker:'Broker B — Cuenta 1', fee:199, capital:10000, target:8, dd:8, daily:5, dir:'short' },
+    { broker:'Broker C — Cuenta 1', fee:199, capital:10000, target:8, dd:8, daily:5, dir:'short' },
+  ];
+
+  const ids = [];
+  brokers.forEach(b => {
+    const id = nextId++;
+    cuentas.push({ id, ...b, pnl: 0, parId: null });
+    ids.push(id);
+  });
+
+  // Emparejar: A1↔B1 (Par 1), A2↔C1 (Par 2)
+  cuentas.find(c => c.id === ids[0]).parId = ids[2];
+  cuentas.find(c => c.id === ids[2]).parId = ids[0];
+  cuentas.find(c => c.id === ids[1]).parId = ids[3];
+  cuentas.find(c => c.id === ids[3]).parId = ids[1];
+
+  log('Estrategia 3×4 cargada: Par 1 (A1↔B1) · Par 2 (A2↔C1)', 'blue');
+  log('BROKER A: 2 cuentas LONG · BROKER B: 1 SHORT · BROKER C: 1 SHORT', 'purple');
+  log('Riesgo recomendado: 1% por trade · Ratio 4:1 · Solo 2 trades para +8%', 'green');
+  guardar(); render(); actualizarFase();
+}
+
+// ─── SEÑAL EN TIEMPO REAL (plan Pro) ─────────
+async function cargarSenal() {
+  const res = await apiCall('GET', '/senales/activa?activo=BTC');
+  if (!res) return;
+  const el = document.getElementById('senal-box');
+  if (!el) return;
+  el.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+      <span style="font-size:11px;color:var(--muted);font-family:var(--mono);">SEÑAL ACTIVA · ${res.activo}</span>
+      <span style="color:var(--blue);font-weight:700;font-family:var(--mono);">@ $${res.precio.toLocaleString()}</span>
+      <span style="margin-left:auto;font-size:10px;color:var(--muted);">${new Date(res.timestamp).toLocaleTimeString('es-ES')}</span>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;">
+      <div style="background:rgba(0,229,160,.08);border:1px solid rgba(0,229,160,.2);border-radius:8px;padding:10px;font-size:12px;">
+        <div style="color:var(--green);font-weight:700;margin-bottom:5px;">▲ LONG — ${res.long.brokers.join(', ')}</div>
+        <div style="color:var(--muted);">Entrada: <span style="color:var(--text);font-family:var(--mono);">$${res.long.entrada.toLocaleString()}</span></div>
+        <div style="color:var(--muted);">SL: <span style="color:var(--red);font-family:var(--mono);">$${res.long.sl.toLocaleString()}</span> &nbsp; TP: <span style="color:var(--green);font-family:var(--mono);">$${res.long.tp.toLocaleString()}</span></div>
+      </div>
+      <div style="background:rgba(255,68,102,.06);border:1px solid rgba(255,68,102,.2);border-radius:8px;padding:10px;font-size:12px;">
+        <div style="color:var(--red);font-weight:700;margin-bottom:5px;">▼ SHORT — ${res.short.brokers.join(', ')}</div>
+        <div style="color:var(--muted);">Entrada: <span style="color:var(--text);font-family:var(--mono);">$${res.short.entrada.toLocaleString()}</span></div>
+        <div style="color:var(--muted);">SL: <span style="color:var(--red);font-family:var(--mono);">$${res.short.sl.toLocaleString()}</span> &nbsp; TP: <span style="color:var(--green);font-family:var(--mono);">$${res.short.tp.toLocaleString()}</span></div>
+      </div>
+    </div>
+    <div style="margin-top:10px;font-size:11px;color:var(--muted);">${res.instruccion}</div>
+  `;
+  el.style.display = 'block';
+}
+
+// ─── INIT ────────────────────────────────────
+window.onload = async () => {
+  const token = localStorage.getItem('fg_token');
+  if (!token) {
+    mostrarLogin();
+    render(); actualizarFase();
+    return;
+  }
+  await cargarCuentas();
+  log('Fondeo Tracker conectado — datos cargados desde servidor', 'purple');
+  const nombre = localStorage.getItem('fg_nombre') || '';
+  if (nombre) log(`Sesión activa: ${nombre}`, 'blue');
+  if (!cuentas.length) {
+    setTimeout(() => {
+      log('Tip: abre "Estrategia 3×4" y pulsa "Cargar cuentas ejemplo" para empezar', 'blue');
+    }, 800);
+  }
+};
+</script>
+</body>
+</html>

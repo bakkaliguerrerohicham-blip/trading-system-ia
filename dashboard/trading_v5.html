@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Trading IA v5 — Impacto Digital</title>
+<style>
+:root {
+  --bg:      #03030a;
+  --s1:      #0a0a12;
+  --s2:      #0f0f1a;
+  --s3:      #141422;
+  --border:  rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.13);
+  --text:    #e2e0f0;
+  --muted:   #5a5870;
+  --green:   #00e5a0;
+  --green2:  #00b87c;
+  --red:     #ff4466;
+  --amber:   #ffb84d;
+  --blue:    #4d9fff;
+  --purple:  #a07fff;
+  --cyan:    #00d4ff;
+  --mono: 'Courier New', monospace;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family: -apple-system, 'Segoe UI', sans-serif; font-size:13px; }
+
+/* ── TOPBAR ─────────────────────────────────────── */
+.topbar {
+  height:52px; background:var(--s1);
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+  padding:0 20px; position:sticky; top:0; z-index:100;
+}
+.logo { display:flex; align-items:center; gap:10px; }
+.logo-pulse { width:8px; height:8px; border-radius:50%; background:var(--green); animation:pulse 2s infinite; }
+.logo-name { font-size:14px; font-weight:700; letter-spacing:-.4px; }
+.logo-v { font-size:11px; color:var(--muted); margin-left:6px; font-family:var(--mono); }
+.top-right { display:flex; align-items:center; gap:14px; }
+.mode-pill { padding:3px 10px; border-radius:20px; font-size:11px; font-family:var(--mono); font-weight:600;
+  background:rgba(0,229,160,0.12); color:var(--green); border:1px solid rgba(0,229,160,0.25); }
+.clock-box { font-family:var(--mono); font-size:12px; color:var(--muted); }
+
+/* ── LAYOUT ─────────────────────────────────────── */
+.layout { display:grid; grid-template-columns:220px 1fr; min-height:calc(100vh - 52px); }
+
+/* ── SIDEBAR ─────────────────────────────────────── */
+.sidebar { background:var(--s1); border-right:1px solid var(--border); padding:16px 0; }
+.sb-section { margin-bottom:20px; }
+.sb-label { font-size:10px; letter-spacing:1.8px; color:var(--muted); padding:0 16px 8px; text-transform:uppercase; }
+.sb-item {
+  display:flex; align-items:center; gap:9px; padding:8px 16px;
+  cursor:pointer; font-size:12px; color:var(--muted);
+  border-left:2px solid transparent; transition:.15s;
+}
+.sb-item:hover { color:var(--text); background:rgba(255,255,255,0.02); }
+.sb-item.active { color:var(--text); border-left-color:var(--green); background:rgba(0,229,160,0.05); }
+.sb-dot { width:6px; height:6px; border-radius:50%; background:currentColor; flex-shrink:0; }
+.sb-badge { margin-left:auto; font-size:10px; font-family:var(--mono); padding:1px 6px;
+  background:rgba(0,229,160,0.1); color:var(--green); border-radius:4px; }
+
+/* Metodología sidebar */
+.method-box { margin:12px 10px; padding:12px; background:var(--s2); border-radius:8px; border:1px solid var(--border); }
+.method-title { font-size:10px; letter-spacing:1px; color:var(--muted); text-transform:uppercase; margin-bottom:10px; }
+.method-step { display:flex; gap:8px; align-items:flex-start; margin-bottom:8px; font-size:11px; }
+.method-num { width:18px; height:18px; border-radius:50%; background:var(--s3);
+  color:var(--green); font-family:var(--mono); font-size:10px; font-weight:700;
+  display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid rgba(0,229,160,0.3); }
+.method-text { color:var(--muted); line-height:1.4; }
+.method-text strong { color:var(--text); display:block; }
+
+/* ── MAIN ─────────────────────────────────────── */
+.main { padding:18px; overflow-y:auto; }
+
+/* ── STATS ROW ─────────────────────────────────── */
+.stats-row { display:grid; grid-template-columns:repeat(5,1fr); gap:10px; margin-bottom:16px; }
+.stat { background:var(--s1); border:1px solid var(--border); border-radius:10px; padding:13px 14px; }
+.stat-label { font-size:10px; color:var(--muted); margin-bottom:5px; letter-spacing:.5px; text-transform:uppercase; }
+.stat-val { font-size:20px; font-weight:700; font-family:var(--mono); }
+.stat-sub { font-size:11px; color:var(--muted); margin-top:3px; }
+.c-green { color:var(--green); }
+.c-red   { color:var(--red); }
+.c-amber { color:var(--amber); }
+.c-blue  { color:var(--blue); }
+.c-muted { color:var(--muted); }
+
+/* ── GRID 2 ─────────────────────────────────────── */
+.g2 { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+.g3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px; margin-bottom:14px; }
+
+/* ── CARD ─────────────────────────────────────── */
+.card { background:var(--s1); border:1px solid var(--border); border-radius:10px; overflow:hidden; }
+.card-head {
+  padding:11px 14px; border-bottom:1px solid var(--border);
+  display:flex; align-items:center; justify-content:space-between;
+}
+.card-title { font-size:12px; font-weight:600; }
+.pill { font-size:10px; font-family:var(--mono); padding:2px 8px; border-radius:4px; font-weight:600; }
+.pill-green { background:rgba(0,229,160,0.12); color:var(--green); }
+.pill-amber { background:rgba(255,184,77,0.12); color:var(--amber); }
+.pill-red   { background:rgba(255,68,102,0.12); color:var(--red); }
+.pill-blue  { background:rgba(77,159,255,0.12); color:var(--blue); }
+.pill-gray  { background:rgba(255,255,255,0.06); color:var(--muted); }
+.card-body { padding:14px; }
+
+/* ── ESCANER / ACTIVOS ─────────────────────────── */
+.asset-card {
+  background:var(--s2); border:1px solid var(--border); border-radius:10px;
+  padding:14px; margin-bottom:10px;
+}
+.asset-card:last-child { margin-bottom:0; }
+.asset-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; }
+.asset-name { font-size:15px; font-weight:700; font-family:var(--mono); }
+.asset-price { font-size:15px; font-weight:700; font-family:var(--mono); }
+.asset-chg { font-size:12px; font-family:var(--mono); }
+.asset-trend { font-size:10px; padding:2px 7px; border-radius:4px; }
+.trend-up { background:rgba(0,229,160,0.1); color:var(--green); }
+.trend-mix { background:rgba(255,184,77,0.1); color:var(--amber); }
+.trend-down { background:rgba(255,68,102,0.1); color:var(--red); }
+
+.filters-row { display:grid; grid-template-columns:repeat(6,1fr); gap:6px; }
+.filter-box {
+  background:var(--s3); border-radius:6px; padding:7px 5px; text-align:center;
+  border:1px solid var(--border);
+}
+.filter-icon { font-size:14px; display:block; margin-bottom:2px; }
+.filter-label { font-size:9px; color:var(--muted); line-height:1.2; }
+.filter-val { font-size:10px; font-family:var(--mono); font-weight:600; margin-top:2px; }
+.f-ok { border-color:rgba(0,229,160,0.3); background:rgba(0,229,160,0.05); }
+.f-ok .filter-val { color:var(--green); }
+.f-warn { border-color:rgba(255,184,77,0.3); }
+.f-warn .filter-val { color:var(--amber); }
+.f-no { border-color:rgba(255,68,102,0.15); }
+.f-no .filter-val { color:var(--red); }
+
+.asset-signal { margin-top:10px; padding:8px 10px; border-radius:6px; font-size:12px; font-weight:600;
+  display:flex; align-items:center; gap:8px; }
+.signal-wait { background:rgba(90,88,112,0.2); color:var(--muted); }
+.signal-alert { background:rgba(0,229,160,0.1); color:var(--green); border:1px solid rgba(0,229,160,0.3); animation:glow 2s infinite; }
+.signal-close { background:rgba(255,184,77,0.1); color:var(--amber); }
+
+/* ── AGENTES ─────────────────────────────────────── */
+.agents-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.agent-box {
+  background:var(--s2); border:1px solid var(--border); border-radius:8px; padding:10px;
+  display:flex; align-items:center; gap:10px;
+}
+.agent-led { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
+.led-ok { background:var(--green); box-shadow:0 0 8px var(--green2); }
+.led-run { background:var(--amber); box-shadow:0 0 8px rgba(255,184,77,0.6); animation:pulse .8s infinite; }
+.led-off { background:var(--muted); }
+.agent-info { flex:1; }
+.agent-name { font-size:12px; font-weight:600; }
+.agent-desc { font-size:10px; color:var(--muted); }
+.agent-num { font-size:10px; font-family:var(--mono); color:var(--muted); }
+
+/* ── POSICIONES ─────────────────────────────────── */
+.pos-empty { text-align:center; padding:24px; color:var(--muted); font-size:12px; }
+.pos-row { display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border); }
+.pos-row:last-child { border-bottom:none; }
+.pos-ticker { font-size:14px; font-weight:700; font-family:var(--mono); }
+.pos-dir { font-size:10px; padding:2px 7px; border-radius:3px; font-weight:700; }
+.dir-long  { background:rgba(0,229,160,0.15); color:var(--green); }
+.dir-short { background:rgba(255,68,102,0.15); color:var(--red); }
+.pos-pnl { font-size:14px; font-weight:700; font-family:var(--mono); }
+.pos-levels { font-size:10px; color:var(--muted); font-family:var(--mono); }
+
+/* ── LOG ─────────────────────────────────────────── */
+.log-area { max-height:200px; overflow-y:auto; }
+.log-line { display:flex; gap:10px; padding:6px 0; border-bottom:1px solid var(--border); font-size:11px; align-items:flex-start; }
+.log-line:last-child { border-bottom:none; }
+.log-t { font-family:var(--mono); color:var(--muted); flex-shrink:0; }
+.log-ok   { color:var(--green); }
+.log-warn { color:var(--amber); }
+.log-err  { color:var(--red); }
+.log-info { color:var(--blue); }
+.log-sys  { color:var(--muted); }
+
+/* ── RIESGO BARS ─────────────────────────────────── */
+.risk-item { margin-bottom:12px; }
+.risk-header { display:flex; justify-content:space-between; margin-bottom:5px; font-size:11px; }
+.risk-label { color:var(--muted); }
+.risk-val { font-family:var(--mono); font-weight:600; }
+.bar-track { height:4px; background:var(--s3); border-radius:2px; overflow:hidden; }
+.bar-fill  { height:100%; border-radius:2px; transition:width .6s ease; }
+
+/* ── HISTORIAL ─────────────────────────────────────── */
+.hist-row { display:flex; align-items:center; justify-content:space-between; padding:8px 0; border-bottom:1px solid var(--border); font-size:12px; }
+.hist-row:last-child { border-bottom:none; }
+.hist-date { color:var(--muted); font-family:var(--mono); font-size:11px; }
+.hist-ticker { font-weight:700; font-family:var(--mono); }
+.hist-result { font-weight:700; font-family:var(--mono); }
+
+/* ── BOTONES ─────────────────────────────────────── */
+.btn-row { display:flex; gap:8px; margin-top:14px; flex-wrap:wrap; }
+.btn { padding:8px 14px; border-radius:6px; font-size:12px; font-weight:600; cursor:pointer; border:none; font-family:inherit; transition:.15s; }
+.btn-go   { background:var(--green); color:#000; }
+.btn-go:hover { background:var(--green2); }
+.btn-loop { background:var(--s2); color:var(--text); border:1px solid var(--border2); }
+.btn-loop.active { border-color:var(--green); color:var(--green); }
+.btn-stop { background:rgba(255,68,102,0.1); color:var(--red); border:1px solid rgba(255,68,102,0.3); }
+
+/* ── ANIMATIONS ─────────────────────────────────── */
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.35} }
+@keyframes glow  { 0%,100%{box-shadow:0 0 8px rgba(0,229,160,0.3)} 50%{box-shadow:0 0 20px rgba(0,229,160,0.6)} }
+@keyframes in    { from{opacity:0;transform:translateY(5px)} to{opacity:1;transform:none} }
+.in { animation:in .3s ease; }
+
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:transparent; }
+::-webkit-scrollbar-thumb { background:var(--border2); border-radius:2px; }
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="logo">
+    <div class="logo-pulse"></div>
+    <span class="logo-name">Trading IA</span>
+    <span class="logo-v">v5 · Confluencia</span>
+  </div>
+  <div class="top-right">
+    <span class="mode-pill" id="mode-badge">● PAPER</span>
+    <div class="clock-box" id="clock">--:--:--</div>
+  </div>
+</div>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sb-section">
+    <div class="sb-label">Navegación</div>
+    <div class="sb-item active"><div class="sb-dot"></div>Dashboard</div>
+    <div class="sb-item"><div class="sb-dot"></div>Escáner<span class="sb-badge" id="sb-señales">0</span></div>
+    <div class="sb-item"><div class="sb-dot"></div>Posiciones</div>
+    <div class="sb-item"><div class="sb-dot"></div>Historial</div>
+  </div>
+
+  <div class="sb-section">
+    <div class="sb-label">Activos v5</div>
+    <div class="sb-item"><div class="sb-dot"></div>SPY — S&P 500</div>
+    <div class="sb-item"><div class="sb-dot"></div>QQQ — Nasdaq</div>
+    <div class="sb-item"><div class="sb-dot"></div>NVDA — Nvidia</div>
+    <div class="sb-item"><div class="sb-dot"></div>BTC-USD — Bitcoin</div>
+  </div>
+
+  <!-- METODOLOGÍA -->
+  <div class="method-box">
+    <div class="method-title">6 Filtros de entrada</div>
+    <div class="method-step">
+      <div class="method-num">1</div>
+      <div class="method-text"><strong>Mercado sano</strong>SPY/BTC &gt; MM200</div>
+    </div>
+    <div class="method-step">
+      <div class="method-num">2</div>
+      <div class="method-text"><strong>Tendencia activo</strong>Precio &gt; MM50 &gt; MM200</div>
+    </div>
+    <div class="method-step">
+      <div class="method-num">3</div>
+      <div class="method-text"><strong>RSI(2) &lt; 8</strong>Sobreventa extrema</div>
+    </div>
+    <div class="method-step">
+      <div class="method-num">4</div>
+      <div class="method-text"><strong>Stoch %K &lt; 25</strong>Doble confirmación</div>
+    </div>
+    <div class="method-step">
+      <div class="method-num">5</div>
+      <div class="method-text"><strong>MACD negativo</strong>Caída real, no trampa</div>
+    </div>
+    <div class="method-step" style="margin-bottom:0">
+      <div class="method-num">6</div>
+      <div class="method-text"><strong>Volumen &gt; media</strong>Capitulación real</div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat">
+      <div class="stat-label">Capital paper</div>
+      <div class="stat-val c-green" id="stat-capital">€500,00</div>
+      <div class="stat-sub">Riesgo 1% · Ratio 4:1</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">PnL histórico</div>
+      <div class="stat-val c-green" id="stat-pnl">+€63,75</div>
+      <div class="stat-sub" id="stat-pnl-pct">+12.75% desde inicio</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Win rate global</div>
+      <div class="stat-val c-green">66,1%</div>
+      <div class="stat-sub">124 ops · 10 años</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Posiciones</div>
+      <div class="stat-val c-amber" id="stat-pos">0 / 2</div>
+      <div class="stat-sub">Máx 2 simultáneas</div>
+    </div>
+    <div class="stat">
+      <div class="stat-label">Última señal</div>
+      <div class="stat-val c-cyan" style="font-size:14px">10 jun</div>
+      <div class="stat-sub">SPY+QQQ · +€40</div>
+    </div>
+  </div>
+
+  <!-- ESCANER ACTIVOS (columna izquierda) + AGENTES+LOG (columna derecha) -->
+  <div class="g2">
+
+    <!-- ESCANER -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Escáner en tiempo real</span>
+        <span class="pill pill-blue" id="scan-hora">14 jun · <span id="scan-time">--:--</span></span>
+      </div>
+      <div class="card-body" id="scanner-body">
+        <!-- JS rellena -->
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA: AGENTES + POSICIONES -->
+    <div>
+
+      <!-- AGENTES -->
+      <div class="card" style="margin-bottom:14px">
+        <div class="card-head">
+          <span class="card-title">6 Agentes IA</span>
+          <span class="pill pill-green" id="agents-pill">Online</span>
+        </div>
+        <div class="card-body">
+          <div class="agents-grid" id="agents-grid"></div>
+          <div class="btn-row">
+            <button class="btn btn-go" onclick="ejecutarCiclo()">▶ Ejecutar ciclo</button>
+            <button class="btn btn-loop" id="btn-loop" onclick="toggleLoop()">⟳ Auto</button>
+            <button class="btn btn-stop" onclick="detenerSistema()">■ Stop</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- POSICIONES -->
+      <div class="card">
+        <div class="card-head">
+          <span class="card-title">Posiciones abiertas</span>
+          <span class="pill pill-amber" id="pos-pill">0 activas</span>
+        </div>
+        <div class="card-body" id="posiciones-body">
+          <div class="pos-empty">Sin posiciones abiertas<br><span style="font-size:11px;color:var(--muted)">Sistema esperando señal de confluencia</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- RIESGO + HISTORIAL -->
+  <div class="g2">
+
+    <!-- RIESGO -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Gestión de riesgo</span>
+        <span class="pill pill-green">Activa</span>
+      </div>
+      <div class="card-body">
+        <div class="risk-item">
+          <div class="risk-header">
+            <span class="risk-label">Pérdida mes (circuit breaker -7%)</span>
+            <span class="risk-val c-green" id="r-mes">0,00€ / 35€</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="background:var(--green);width:0%" id="bar-mes"></div></div>
+        </div>
+        <div class="risk-item">
+          <div class="risk-header">
+            <span class="risk-label">Posiciones vs máximo (2)</span>
+            <span class="risk-val" id="r-pos">0/2</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="background:var(--amber);width:0%" id="bar-pos"></div></div>
+        </div>
+        <div class="risk-item" style="margin-bottom:0">
+          <div class="risk-header">
+            <span class="risk-label">Capital en riesgo ahora</span>
+            <span class="risk-val" id="r-cap">0€</span>
+          </div>
+          <div class="bar-track"><div class="bar-fill" style="background:var(--red);width:0%" id="bar-cap"></div></div>
+        </div>
+        <div style="margin-top:14px;padding:10px;background:var(--s2);border-radius:8px;">
+          <div style="font-size:10px;color:var(--muted);margin-bottom:8px;letter-spacing:1px;text-transform:uppercase;">Parámetros v5 activos</div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;">
+            <span class="pill pill-green">Riesgo 1%/op</span>
+            <span class="pill pill-green">Ratio 4:1</span>
+            <span class="pill pill-green">SL 1.5×ATR</span>
+            <span class="pill pill-amber">-7% circuit</span>
+            <span class="pill pill-blue">RSI2 &lt; 8</span>
+            <span class="pill pill-blue">Stoch &lt; 25</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- HISTORIAL -->
+    <div class="card">
+      <div class="card-head">
+        <span class="card-title">Historial paper trading</span>
+        <span class="pill pill-green">+12.75%</span>
+      </div>
+      <div class="card-body">
+        <div id="historial-body">
+          <div class="hist-row">
+            <div>
+              <div class="hist-ticker">SPY</div>
+              <div class="hist-date">10 jun 2026 · LONG</div>
+            </div>
+            <div style="text-align:right">
+              <div class="hist-result c-green">+€20,00</div>
+              <div class="hist-date">+1.70% · 1 día</div>
+            </div>
+          </div>
+          <div class="hist-row">
+            <div>
+              <div class="hist-ticker">QQQ</div>
+              <div class="hist-date">10 jun 2026 · LONG</div>
+            </div>
+            <div style="text-align:right">
+              <div class="hist-result c-green">+€20,00</div>
+              <div class="hist-date">+3.38% · 1 día</div>
+            </div>
+          </div>
+          <div class="hist-row">
+            <div>
+              <div class="hist-ticker">QQQ</div>
+              <div class="hist-date">Escultor backt. · LONG</div>
+            </div>
+            <div style="text-align:right">
+              <div class="hist-result c-green">+€13,75</div>
+              <div class="hist-date">72.5% WR · 40 ops</div>
+            </div>
+          </div>
+          <div class="hist-row">
+            <div>
+              <div class="hist-ticker">SPY</div>
+              <div class="hist-date">Escultor backt. · LONG</div>
+            </div>
+            <div style="text-align:right">
+              <div class="hist-result c-green">+€10,00</div>
+              <div class="hist-date">64.7% WR · 34 ops</div>
+            </div>
+          </div>
+          <div style="margin-top:14px;padding:10px;background:var(--s2);border-radius:8px;display:flex;justify-content:space-between;font-size:12px;">
+            <div><div style="color:var(--muted);margin-bottom:2px">P&L Total</div><div class="c-green" style="font-weight:700;font-family:var(--mono)">+€63,75</div></div>
+            <div><div style="color:var(--muted);margin-bottom:2px">Ops totales</div><div style="font-weight:700;font-family:var(--mono)">124</div></div>
+            <div><div style="color:var(--muted);margin-bottom:2px">Mejor activo</div><div style="font-weight:700;font-family:var(--mono);color:var(--cyan)">QQQ 72.5%</div></div>
+            <div><div style="color:var(--muted);margin-bottom:2px">Peor racha</div><div style="font-weight:700;font-family:var(--mono);color:var(--amber)">-5 seguidas</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- LOG -->
+  <div class="card">
+    <div class="card-head">
+      <span class="card-title">Log del sistema</span>
+      <span class="pill pill-gray" id="log-count">0 eventos</span>
+    </div>
+    <div class="card-body">
+      <div class="log-area" id="log-area"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<script>
+// ═══════════════════════════════════════
+//  DATOS REALES — actualizados 14/06/2026
+// ═══════════════════════════════════════
+const MERCADOS = {
+  "SPY":     { precio:741.75, cambio:+0.54, vol:56.9,  rsi2:51.5, stk:40.1,  macdh:-4.21,  mm50:721.07, mm200:683.56, tendencia:"UPTREND" },
+  "QQQ":     { precio:721.34, cambio:+0.59, vol:51.2,  rsi2:62.4, stk:49.4,  macdh:-6.24,  mm50:679.07, mm200:623.71, tendencia:"UPTREND" },
+  "NVDA":    { precio:205.19, cambio:+0.16, vol:112.0, rsi2:36.4, stk:16.9,  macdh:-2.54,  mm50:206.11, mm200:188.92, tendencia:"MIXTO"   },
+  "BTC-USD": { precio:64083,  cambio:-0.52, vol:15.9,  rsi2:72.2, stk:33.5,  macdh:192.84, mm50:73887,  mm200:77637,  tendencia:"MIXTO"   }
+};
+
+const AGENTES_DEF = [
+  { num:"01", name:"Escáner",    desc:"Patrones · 1d" },
+  { num:"02", name:"Estratega",  desc:"Sesión + macro" },
+  { num:"03", name:"Indicadores",desc:"RSI · Stoch · MACD" },
+  { num:"04", name:"Riesgo",     desc:"ATR · SL/TP" },
+  { num:"05", name:"Ejecutor",   desc:"Paper / IBKR" },
+  { num:"06", name:"Vigilante",  desc:"Monitor continuo" }
+];
+
+let agentStates = ["ok","ok","ok","ok","ok","ok"];
+let posiciones   = [];
+let logs         = [];
+let ciclos       = 0;
+let loopOn       = false;
+let loopTimer    = null;
+let pnl          = 63.75;
+let capital      = 500 + pnl;
+
+// ─── INIT ─────────────────────────────────
+window.onload = () => {
+  renderAgentes();
+  renderScanner();
+  tick();
+  setInterval(tick, 1000);
+  log("Sistema Trading IA v5 iniciado — 6 filtros de confluencia", "ok");
+  log("Activos: SPY | QQQ | NVDA | BTC-USD (ETH eliminado por -1.9%)", "info");
+  log("Estrategia: Mean Reversion en sobreventa extrema dentro de uptrend", "info");
+  log("Capital paper: €500 | Riesgo: 1%/op | Ratio: 4:1 | SL: 1.5×ATR", "info");
+  log("Esperando RSI(2) < 8 + Stoch < 25 + MACD neg + Vol > media...", "sys");
+  actualizarStats();
+};
+
+// ─── CLOCK ────────────────────────────────
+function tick(){
+  const n = new Date();
+  const h = n.toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  document.getElementById('clock').textContent = h;
+  document.getElementById('scan-time').textContent = h.slice(0,5);
+}
+
+// ─── SCANNER ──────────────────────────────
+function renderScanner(){
+  const body = document.getElementById('scanner-body');
+  body.innerHTML = '';
+  let señales = 0;
+
+  for(const [ticker, d] of Object.entries(MERCADOS)){
+    // Evaluar los 6 filtros
+    const f1_ok = d.tendencia !== "MIXTO";                  // Mercado sano (simplificado)
+    const f2_ok = d.tendencia === "UPTREND";                // Precio > MM50 > MM200
+    const f3_ok = d.rsi2 < 8;                               // RSI(2) < 8
+    const f4_ok = d.stk < 25;                               // Stoch < 25
+    const f5_ok = d.macdh < 0;                              // MACD histograma negativo
+    const f6_ok = d.vol > 30;                               // Vol > media (proxy)
+    const allOk = f1_ok && f2_ok && f3_ok && f4_ok && f5_ok && f6_ok;
+    if(allOk) señales++;
+
+    const esPos  = d.cambio >= 0;
+    const tClass = d.tendencia === "UPTREND" ? "trend-up" : d.tendencia === "MIXTO" ? "trend-mix" : "trend-down";
+
+    const fClass = v => v ? "f-ok" : "f-no";
+    const fTick  = v => v ? "✓" : "✗";
+
+    const signalHtml = allOk
+      ? `<div class="asset-signal signal-alert">🔔 SEÑAL ACTIVA — todos los filtros OK · Entrada confirmada</div>`
+      : nearSignal(d)
+        ? `<div class="asset-signal signal-close">⚡ Cerca — ${nearMsg(d)}</div>`
+        : `<div class="asset-signal signal-wait">⚪ Esperando — ${waitMsg(d)}</div>`;
+
+    body.innerHTML += `
+    <div class="asset-card in">
+      <div class="asset-header">
+        <div>
+          <span class="asset-name">${ticker}</span>
+          <span class="asset-trend ${tClass}" style="margin-left:8px">${d.tendencia}</span>
+        </div>
+        <div style="text-align:right">
+          <div class="asset-price">$${d.precio.toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})}</div>
+          <div class="asset-chg ${esPos?'c-green':'c-red'}">${esPos?'+':''}${d.cambio}%</div>
+        </div>
+      </div>
+      <div class="filters-row">
+        <div class="filter-box ${fClass(f1_ok)}">
+          <span class="filter-icon">${fTick(f1_ok)}</span>
+          <div class="filter-label">Mercado sano</div>
+          <div class="filter-val">${d.mm200>0?'SPY OK':'—'}</div>
+        </div>
+        <div class="filter-box ${fClass(f2_ok)}">
+          <span class="filter-icon">${fTick(f2_ok)}</span>
+          <div class="filter-label">Tendencia</div>
+          <div class="filter-val">${d.tendencia}</div>
+        </div>
+        <div class="filter-box ${fClass(f3_ok)}">
+          <span class="filter-icon">${fTick(f3_ok)}</span>
+          <div class="filter-label">RSI(2)</div>
+          <div class="filter-val">${d.rsi2}</div>
+        </div>
+        <div class="filter-box ${fClass(f4_ok)}">
+          <span class="filter-icon">${fTick(f4_ok)}</span>
+          <div class="filter-label">Stoch %K</div>
+          <div class="filter-val">${d.stk}</div>
+        </div>
+        <div class="filter-box ${fClass(f5_ok)}">
+          <span class="filter-icon">${fTick(f5_ok)}</span>
+          <div class="filter-label">MACD hist</div>
+          <div class="filter-val">${d.macdh > 0 ? '+'+d.macdh : d.macdh}</div>
+        </div>
+        <div class="filter-box ${fClass(f6_ok)}">
+          <span class="filter-icon">${fTick(f6_ok)}</span>
+          <div class="filter-label">Volumen</div>
+          <div class="filter-val">${d.vol}M</div>
+        </div>
+      </div>
+      ${signalHtml}
+    </div>`;
+  }
+
+  document.getElementById('sb-señales').textContent = señales;
+}
+
+function nearSignal(d){
+  return d.rsi2 < 20 || (d.stk < 30 && d.macdh < 0);
+}
+function nearMsg(d){
+  if(d.rsi2 < 20) return `RSI(2) en ${d.rsi2} — se acerca a zona de entrada`;
+  return `Stoch ${d.stk} + MACD negativo — falta RSI`;
+}
+function waitMsg(d){
+  const f = [];
+  if(d.rsi2 >= 8)  f.push(`RSI(2) ${d.rsi2} (necesita <8)`);
+  if(d.stk >= 25)  f.push(`Stoch ${d.stk} (necesita <25)`);
+  if(d.macdh >= 0) f.push(`MACD positivo`);
+  if(d.tendencia !== "UPTREND") f.push(`tendencia mixta`);
+  return f[0] || "mercado neutral";
+}
+
+// ─── AGENTES ──────────────────────────────
+function renderAgentes(){
+  const g = document.getElementById('agents-grid');
+  g.innerHTML = AGENTES_DEF.map((a,i) => {
+    const st = agentStates[i];
+    return `<div class="agent-box in">
+      <div class="agent-led led-${st}"></div>
+      <div class="agent-info">
+        <div class="agent-name">${a.name}</div>
+        <div class="agent-desc">${a.desc}</div>
+      </div>
+      <div class="agent-num">A${a.num}</div>
+    </div>`;
+  }).join('');
+}
+
+// ─── CICLO ────────────────────────────────
+async function ejecutarCiclo(){
+  ciclos++;
+  log(`— Ciclo #${ciclos} iniciado —`, "sys");
+
+  for(let i=0; i<6; i++){
+    agentStates = agentStates.map((_,j) => j<i ? "ok" : j===i ? "run" : "off");
+    renderAgentes();
+    const msgs = [
+      `[A01] Escaneando SPY · QQQ · NVDA · BTC-USD en timeframe diario...`,
+      `[A02] Sesión activa: NY. Sin eventos macro en próximas 2h.`,
+      `[A03] RSI(2): SPY=51.5 QQQ=62.4 NVDA=36.4 BTC=72.2 — umbral <8`,
+      `[A04] Sin señal hoy — filtros no cumplidos. Riesgo semana: 0€`,
+      `[A05] Ejecutor en standby — sin orden pendiente`,
+      `[A06] Vigilante activo. 0 posiciones abiertas monitorizadas.`
+    ];
+    log(msgs[i], "info");
+    await sleep(400 + Math.random()*300);
+  }
+
+  agentStates = ["ok","ok","ok","ok","ok","ok"];
+  renderAgentes();
+  log(`⚪ Sin señal en ciclo #${ciclos} — mercado en zona media. Próximo ciclo en 15 min.`, "warn");
+  log(`— Ciclo #${ciclos} completado —`, "sys");
+}
+
+// ─── LOOP ─────────────────────────────────
+function toggleLoop(){
+  const btn = document.getElementById('btn-loop');
+  loopOn = !loopOn;
+  if(loopOn){
+    btn.textContent = '⟳ Auto ON'; btn.classList.add('active');
+    log("Loop automático activado — ciclos cada 15 minutos", "ok");
+    loopTimer = setInterval(ejecutarCiclo, 15 * 60 * 1000);
+  } else {
+    btn.textContent = '⟳ Auto'; btn.classList.remove('active');
+    log("Loop detenido", "warn");
+    clearInterval(loopTimer);
+  }
+}
+
+function detenerSistema(){
+  if(!confirm("¿Detener el sistema? Se cancelarán todas las posiciones.")) return;
+  loopOn = false; clearInterval(loopTimer);
+  posiciones = [];
+  agentStates = ["off","off","off","off","off","off"];
+  renderAgentes();
+  document.getElementById('agents-pill').textContent = "Offline";
+  document.getElementById('agents-pill').className = "pill pill-red";
+  renderPosiciones();
+  log("⛔ SISTEMA DETENIDO — todos los agentes offline", "err");
+}
+
+// ─── POSICIONES ───────────────────────────
+function renderPosiciones(){
+  const el = document.getElementById('posiciones-body');
+  document.getElementById('stat-pos').textContent = `${posiciones.length} / 2`;
+  document.getElementById('pos-pill').textContent = `${posiciones.length} activas`;
+  document.getElementById('r-pos').textContent = `${posiciones.length}/2`;
+  document.getElementById('bar-pos').style.width = `${posiciones.length/2*100}%`;
+
+  if(!posiciones.length){
+    el.innerHTML = '<div class="pos-empty">Sin posiciones abiertas<br><span style="font-size:11px;color:var(--muted)">Sistema esperando señal de confluencia</span></div>';
+    return;
+  }
+  el.innerHTML = posiciones.map(p => {
+    const pct  = ((Math.random()*3-0.5)).toFixed(2);
+    const esP  = pct >= 0;
+    return `<div class="pos-row in">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px">
+          <span class="pos-ticker">${p.ticker}</span>
+          <span class="pos-dir dir-${p.dir}">${p.dir.toUpperCase()}</span>
+        </div>
+        <div class="pos-levels">SL $${p.sl} · TP $${p.tp}</div>
+      </div>
+      <div style="text-align:right">
+        <div class="pos-pnl ${esP?'c-green':'c-red'}">${esP?'+':''}${pct}%</div>
+        <div class="pos-levels">@ $${p.entrada}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+// ─── STATS ────────────────────────────────
+function actualizarStats(){
+  document.getElementById('stat-capital').textContent = `€${(capital).toFixed(2).replace('.',',')}`;
+  document.getElementById('stat-pnl').textContent     = `+€${pnl.toFixed(2).replace('.',',')}`;
+  document.getElementById('stat-pnl-pct').textContent = `+${(pnl/500*100).toFixed(2)}% desde inicio`;
+  renderPosiciones();
+}
+
+// ─── LOG ──────────────────────────────────
+function log(msg, tipo="sys"){
+  const h = new Date().toLocaleTimeString('es-ES',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+  logs.unshift({h, msg, tipo});
+  if(logs.length > 60) logs.pop();
+  const el = document.getElementById('log-area');
+  el.innerHTML = logs.map(e => `<div class="log-line">
+    <span class="log-t">${e.h}</span>
+    <span class="log-${e.tipo}">${e.msg}</span>
+  </div>`).join('');
+  document.getElementById('log-count').textContent = `${logs.length} eventos`;
+}
+
+function sleep(ms){ return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>

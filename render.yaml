@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: trading-system-ia
+    runtime: docker
+    dockerfilePath: Dockerfile
+    dockerContext: .
+    port: 8002
+    envVars:
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: TRADING_MODE
+        value: paper
+    plan: free
+    autoDeploy: false
+    healthCheckPath: /api/estado
