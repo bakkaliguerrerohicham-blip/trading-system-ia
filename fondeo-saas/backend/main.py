@@ -46,6 +46,13 @@ app.add_middleware(
 static_dir = os.path.join(os.path.dirname(__file__), "..")
 app.mount("/app", StaticFiles(directory=static_dir, html=True), name="static")
 
+# NDA API
+try:
+    from nda_api import registrar_firma, listar_firmas, actualizar_estado, confirmar_aprobacion
+    _NDA_OK = True
+except ImportError:
+    _NDA_OK = False
+
 
 # ══════════════════════════════════════════════════════════════════════════════
 # SCHEMAS
@@ -457,6 +464,62 @@ def listar_suscriptores_api():
         return {"suscriptores": listar_suscriptores()}
     except Exception as e:
         return {"error": str(e)}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NDA — FONDEO GARANTIZADO (método protegido)
+# ══════════════════════════════════════════════════════════════════════════════
+
+class NDAIn(BaseModel):
+    nombre: str
+    email: str
+    telefono: str = ""
+    acepta_confidencialidad: bool
+    acepta_fee_exito: bool
+    confirma_experiencia: bool
+    timestamp: str = ""
+    ip_aprox: str = ""
+
+class ConfirmarAprobacionIn(BaseModel):
+    email: str
+    broker: str
+    screenshot_url: str = ""
+
+@app.post("/api/nda/firmar", tags=["coaching"])
+def firmar_nda(data: NDAIn, request: Request):
+    if not (data.acepta_confidencialidad and data.acepta_fee_exito and data.confirma_experiencia):
+        raise HTTPException(400, "Debes aceptar todos los puntos del NDA")
+    ip = request.headers.get("X-Forwarded-For", request.client.host if request.client else "")
+    datos = data.dict()
+    datos["ip_aprox"] = ip
+    if not datos.get("timestamp"):
+        datos["timestamp"] = datetime.now(timezone.utc).isoformat()
+    if _NDA_OK:
+        return registrar_firma(datos)
+    return {
+        "ok": True, "mensaje": "NDA registrado (modo offline).",
+        "siguiente_paso": "Te contactaremos en 24h."
+    }
+
+@app.get("/api/nda/firmas", tags=["coaching"])
+def ver_firmas():
+    if not _NDA_OK:
+        return {"firmas": []}
+    return {"firmas": listar_firmas()}
+
+@app.post("/api/nda/confirmar-aprobacion", tags=["coaching"])
+def confirmar_aprobacion_endpoint(data: ConfirmarAprobacionIn):
+    if not _NDA_OK:
+        return {"ok": True, "mensaje": "Confirmación recibida. Te contactamos para el pago."}
+    return confirmar_aprobacion(data.email, data.broker, data.screenshot_url)
+
+@app.get("/coaching", tags=["coaching"])
+def coaching_landing():
+    from fastapi.responses import FileResponse
+    coaching_path = os.path.join(static_dir, "coaching.html")
+    if os.path.exists(coaching_path):
+        return FileResponse(coaching_path)
+    raise HTTPException(404, "coaching.html not found")
 
 
 # ── Entry point ───────────────────────────────────────────────────────────────

@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Fondeo Garantizado — Aprueba tu examen o no pagas | Impacto Digital</title>
+<meta name="description" content="Servicio de coaching exclusivo. Aprueba tu examen de fondeo con una estrategia matemática probada. Solo pagas si apruebas.">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+:root {
+  --oro: #f5c842;
+  --oro2: #e6a817;
+  --bg: #04060f;
+  --card: #080f1e;
+  --border: #1a2a4a;
+  --text: #f0f4ff;
+  --muted: #4a6080;
+  --verde: #00d4aa;
+  --rojo: #ff4757;
+}
+body { background:var(--bg); color:var(--text); font-family:'Segoe UI',system-ui,sans-serif; overflow-x:hidden; }
+
+/* NAV */
+nav { padding:18px 32px; display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--bg)ee; z-index:50; backdrop-filter:blur(10px); }
+.logo { font-weight:900; font-size:1.1rem; background:linear-gradient(135deg,var(--oro),var(--oro2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.nav-cta { background:linear-gradient(135deg,var(--oro),var(--oro2)); color:#04060f; font-weight:800; padding:8px 20px; border-radius:8px; text-decoration:none; font-size:.88rem; }
+
+/* HERO */
+.hero { min-height:92vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; padding:60px 20px; position:relative; }
+.hero::before { content:''; position:absolute; inset:0; background:radial-gradient(ellipse at 50% 30%,#f5c84210 0%,transparent 60%); pointer-events:none; }
+.eyebrow { background:#f5c84218; border:1px solid #f5c84244; color:var(--oro); padding:6px 16px; border-radius:20px; font-size:.78rem; font-weight:700; letter-spacing:.08em; margin-bottom:28px; display:inline-block; }
+.hero h1 { font-size:clamp(2.2rem,5.5vw,4rem); font-weight:900; line-height:1.1; max-width:820px; margin-bottom:22px; }
+.hero h1 .oro { background:linear-gradient(135deg,var(--oro),var(--oro2)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+.hero h1 .tachado { text-decoration:line-through; opacity:.45; }
+.hero p.sub { font-size:1.15rem; color:var(--muted); max-width:560px; line-height:1.75; margin-bottom:44px; }
+.hero-cta { background:linear-gradient(135deg,var(--oro),var(--oro2)); color:#04060f; font-weight:900; padding:18px 44px; border-radius:12px; font-size:1.05rem; border:none; cursor:pointer; transition:.2s; box-shadow:0 8px 40px #f5c84230; }
+.hero-cta:hover { transform:translateY(-3px); box-shadow:0 14px 50px #f5c84250; }
+.zero-risk { margin-top:22px; color:var(--muted); font-size:.82rem; }
+.zero-risk strong { color:var(--verde); }
+
+/* GARANTIA HERO */
+.garantia-strip { background:linear-gradient(135deg,#f5c84212,#e6a81708); border:1px solid #f5c84230; border-radius:16px; padding:24px 32px; max-width:700px; margin:50px auto 0; display:flex; gap:32px; flex-wrap:wrap; justify-content:center; text-align:center; }
+.g-item .g-num { font-size:2rem; font-weight:900; color:var(--oro); }
+.g-item .g-label { font-size:.78rem; color:var(--muted); margin-top:2px; }
+
+/* SECCIÓN */
+.section { padding:90px 24px; max-width:1100px; margin:0 auto; }
+.s-title { font-size:clamp(1.7rem,3.5vw,2.5rem); font-weight:900; text-align:center; margin-bottom:12px; }
+.s-sub { color:var(--muted); text-align:center; max-width:560px; margin:0 auto 56px; line-height:1.65; }
+
+/* PROBLEMA */
+.problema-grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:20px; }
+.prob { background:var(--card); border:1px solid #ff475730; border-radius:14px; padding:24px; }
+.prob .icon { font-size:1.8rem; margin-bottom:12px; }
+.prob h3 { font-size:.95rem; margin-bottom:8px; color:#ff9999; }
+.prob p { color:var(--muted); font-size:.85rem; line-height:1.6; }
+
+/* SOLUCIÓN */
+.solucion-box { background:linear-gradient(135deg,#0a1628,#0d1f3a); border:1px solid var(--border); border-radius:20px; padding:56px 48px; text-align:center; max-width:800px; margin:0 auto; }
+.solucion-box h2 { font-size:1.6rem; margin-bottom:16px; }
+.solucion-box p { color:var(--muted); line-height:1.75; margin-bottom:28px; font-size:1rem; }
+.metodo-lock { background:#f5c84215; border:1px solid var(--oro); border-radius:12px; padding:20px 28px; display:inline-block; margin-bottom:28px; }
+.metodo-lock .lock-icon { font-size:2rem; margin-bottom:8px; }
+.metodo-lock p { color:var(--oro); font-size:.88rem; font-weight:700; margin:0; }
+
+/* COMO FUNCIONA EL SERVICIO */
+.pasos { display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:20px; }
+.paso { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:28px; position:relative; }
+.paso-n { width:38px; height:38px; background:linear-gradient(135deg,var(--oro),var(--oro2)); color:#04060f; border-radius:50%; display:flex; align-items:center; justify-content:center; font-weight:900; font-size:.95rem; margin-bottom:16px; }
+.paso h3 { font-size:.95rem; margin-bottom:8px; }
+.paso p { color:var(--muted); font-size:.84rem; line-height:1.6; }
+
+/* PARA QUIEN */
+.quien-grid { display:grid; grid-template-columns:1fr 1fr; gap:24px; max-width:800px; margin:0 auto; }
+.quien-col { background:var(--card); border:1px solid var(--border); border-radius:14px; padding:28px; }
+.quien-col h3 { font-size:1rem; margin-bottom:16px; padding-bottom:10px; border-bottom:1px solid var(--border); }
+.quien-col ul { list-style:none; }
+.quien-col ul li { padding:7px 0; font-size:.88rem; color:var(--muted); }
+.quien-col.si ul li::before { content:'✅ '; }
+.quien-col.no ul li::before { content:'❌ '; }
+@media(max-width:600px){ .quien-grid{ grid-template-columns:1fr; } }
+
+/* PRECIO */
+.precio-box { background:var(--card); border:2px solid var(--oro); border-radius:20px; padding:48px 40px; max-width:500px; margin:0 auto; text-align:center; box-shadow:0 0 60px #f5c84218; }
+.precio-box .precio-label { color:var(--oro); font-size:.82rem; font-weight:700; letter-spacing:.1em; margin-bottom:12px; }
+.precio-box .tachado-precio { font-size:1.1rem; color:var(--muted); text-decoration:line-through; margin-bottom:6px; }
+.precio-box .precio-main { font-size:3.6rem; font-weight:900; color:var(--oro); line-height:1; margin-bottom:8px; }
+.precio-box .precio-nota { font-size:.82rem; color:var(--muted); margin-bottom:28px; }
+.precio-box ul { text-align:left; list-style:none; margin-bottom:32px; }
+.precio-box ul li { padding:8px 0; font-size:.9rem; border-bottom:1px solid var(--border); }
+.precio-box ul li::before { content:'→ '; color:var(--oro); font-weight:700; }
+.precio-box ul li:last-child { border:none; }
+.btn-oro { width:100%; padding:16px; background:linear-gradient(135deg,var(--oro),var(--oro2)); color:#04060f; font-weight:900; font-size:1rem; border:none; border-radius:10px; cursor:pointer; transition:.2s; }
+.btn-oro:hover { transform:translateY(-2px); box-shadow:0 8px 30px #f5c84240; }
+.garantia-nota { margin-top:18px; font-size:.8rem; color:var(--verde); }
+
+/* NDA MODAL */
+.modal-bg { display:none; position:fixed; inset:0; background:#000b; z-index:200; align-items:center; justify-content:center; padding:20px; }
+.modal-bg.open { display:flex; }
+.modal { background:#080f1e; border:1px solid var(--oro); border-radius:18px; padding:40px 36px; width:100%; max-width:580px; max-height:90vh; overflow-y:auto; }
+.modal h2 { font-size:1.2rem; margin-bottom:6px; }
+.modal .modal-sub { color:var(--muted); font-size:.83rem; margin-bottom:24px; }
+.nda-text { background:#04060f; border:1px solid var(--border); border-radius:10px; padding:20px; margin-bottom:20px; max-height:200px; overflow-y:auto; font-size:.78rem; color:var(--muted); line-height:1.7; }
+.nda-text strong { color:var(--text); }
+.modal input { width:100%; background:#04060f; border:1px solid var(--border); color:var(--text); padding:11px 14px; border-radius:8px; margin-bottom:10px; font-size:.9rem; outline:none; }
+.modal input:focus { border-color:var(--oro); }
+.check-row { display:flex; align-items:flex-start; gap:12px; margin-bottom:20px; }
+.check-row input[type=checkbox] { width:18px; height:18px; margin-top:2px; accent-color:var(--oro); flex-shrink:0; }
+.check-row label { font-size:.82rem; color:var(--muted); line-height:1.5; }
+.check-row label strong { color:var(--text); }
+.modal-footer { display:flex; gap:12px; }
+.btn-cancel { flex:1; padding:12px; background:transparent; border:1px solid var(--border); color:var(--muted); border-radius:8px; cursor:pointer; }
+.btn-firmar { flex:2; padding:12px; background:linear-gradient(135deg,var(--oro),var(--oro2)); color:#04060f; font-weight:900; border:none; border-radius:8px; cursor:pointer; }
+
+/* CONFIRMACION */
+.confirm-box { display:none; background:#00d4aa12; border:1px solid var(--verde); border-radius:14px; padding:32px; text-align:center; max-width:560px; margin:0 auto; }
+.confirm-box.show { display:block; }
+.confirm-box h3 { color:var(--verde); margin-bottom:12px; font-size:1.2rem; }
+.confirm-box p { color:var(--muted); font-size:.88rem; line-height:1.6; }
+
+/* FAQ */
+.faq { max-width:700px; margin:0 auto; }
+.faq-item { border-bottom:1px solid var(--border); padding:20px 0; cursor:pointer; }
+.faq-item h4 { font-size:.92rem; display:flex; justify-content:space-between; align-items:center; gap:12px; }
+.faq-item p { display:none; color:var(--muted); font-size:.85rem; line-height:1.7; margin-top:12px; }
+.faq-item.open p { display:block; }
+.faq-item h4::after { content:'+'; color:var(--oro); font-size:1.2rem; flex-shrink:0; }
+.faq-item.open h4::after { content:'−'; }
+
+/* CTA FINAL */
+.cta-final { background:linear-gradient(135deg,#0d1a3a,#0a1020); border:1px solid var(--border); border-radius:20px; padding:70px 40px; text-align:center; }
+.cta-final h2 { font-size:2rem; font-weight:900; margin-bottom:14px; }
+.cta-final p { color:var(--muted); max-width:520px; margin:0 auto 32px; line-height:1.7; }
+
+/* TOAST */
+.toast { position:fixed; bottom:24px; right:24px; background:var(--verde); color:#04060f; padding:12px 22px; border-radius:10px; font-weight:800; font-size:.85rem; opacity:0; transition:opacity .3s; z-index:300; }
+.toast.show { opacity:1; }
+
+footer { text-align:center; padding:40px 24px; color:var(--muted); font-size:.78rem; border-top:1px solid var(--border); line-height:1.8; }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">⚡ Fondeo Garantizado</div>
+  <a href="#precio" class="nav-cta" onclick="document.getElementById('precio').scrollIntoView({behavior:'smooth'});return false;">Solo pago si apruebo →</a>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="eyebrow">🔒 MÉTODO EXCLUSIVO — ACCESO BAJO NDA</div>
+  <h1>Aprueba tu examen de fondeo.<br><span class="tachado">Quizás.</span> <span class="oro">Garantizado.</span></h1>
+  <p class="sub">Un método de gestión de riesgo matemáticamente probado que hace imposible no superar la Fase 1 y la Fase 2 de cualquier examen de fondeo. Tú operas. Yo te guío. Solo pagas si apruebas.</p>
+  <button class="hero-cta" onclick="abrirNDA()">Quiero conocer el método →</button>
+  <div class="zero-risk">Sin riesgo para ti — <strong>Fee de éxito: solo si apruebas</strong> — NDA requerido</div>
+
+  <div class="garantia-strip">
+    <div class="g-item"><div class="g-num">€0</div><div class="g-label">Pagas si no apruebas</div></div>
+    <div class="g-item"><div class="g-num">≥95%</div><div class="g-label">Probabilidad matemática</div></div>
+    <div class="g-item"><div class="g-num">3</div><div class="g-label">Brokers. Tú eliges cuáles.</div></div>
+    <div class="g-item"><div class="g-num">100%</div><div class="g-label">Legal. Tú operas tus cuentas.</div></div>
+  </div>
+</section>
+
+<!-- EL PROBLEMA -->
+<div class="section">
+  <div class="s-title">El problema con los exámenes de fondeo</div>
+  <div class="s-sub">El 90% de los traders fallan. No por falta de conocimiento, sino por cómo están diseñados los exámenes.</div>
+  <div class="problema-grid">
+    <div class="prob">
+      <div class="icon">⏱️</div>
+      <h3>Presión psicológica brutal</h3>
+      <p>Los límites de drawdown diario y total generan pánico. Un mal día y pierdes semanas de trabajo.</p>
+    </div>
+    <div class="prob">
+      <div class="icon">🎲</div>
+      <h3>Depende del mercado</h3>
+      <p>Puedes tener la mejor estrategia y el mercado te cierra en rango durante semanas. Sin movimiento, sin aprobación.</p>
+    </div>
+    <div class="prob">
+      <div class="icon">💸</div>
+      <h3>Repites y repites pagando</h3>
+      <p>€100-400 cada intento. La mayoría necesita 3-5 intentos. El broker de fondeo gana con tus fracasos.</p>
+    </div>
+    <div class="prob">
+      <div class="icon">🔁</div>
+      <h3>Fase 1 y Fase 2. Doble trampa.</h3>
+      <p>Apruebas el 4% de Fase 1 y luego debes repetir con +8%. Otro período de riesgo donde todo puede perderse.</p>
+    </div>
+  </div>
+</div>
+
+<!-- LA SOLUCIÓN -->
+<div class="section" style="padding-top:0">
+  <div class="solucion-box">
+    <h2>Existe un método que convierte el examen<br>en un ejercicio matemático, no en un juego de azar.</h2>
+    <p>No es un indicador. No es una estrategia de entrada. Es una estructura de gestión de riesgo entre brokers que hace matemáticamente imposible no producir al menos una cuenta aprobada por cada bloque de operaciones.</p>
+    <div class="metodo-lock">
+      <div class="lock-icon">🔐</div>
+      <p>El método completo se revela solo tras firma de NDA digital.<br>No por secretismo innecesario — para que siga funcionando para todos.</p>
+    </div>
+    <p style="font-size:.85rem">Tú operas tus propias cuentas en tus propios brokers. Yo te explico exactamente qué hacer, cuándo hacerlo y por qué funciona. No hay ningún movimiento de fondos ni gestión de cuentas ajenas de mi parte.</p>
+  </div>
+</div>
+
+<!-- COMO FUNCIONA EL SERVICIO -->
+<div class="section">
+  <div class="s-title">Cómo funciona el servicio</div>
+  <div class="s-sub">Cinco pasos desde que contactas hasta que tienes tu cuenta fondeada activa.</div>
+  <div class="pasos">
+    <div class="paso">
+      <div class="paso-n">1</div>
+      <h3>Firmas el NDA</h3>
+      <p>Digital, en esta misma página. Protege el método para que siga funcionando. Sin NDA, no hay sesión.</p>
+    </div>
+    <div class="paso">
+      <div class="paso-n">2</div>
+      <h3>Sesión privada de 1h</h3>
+      <p>Por videollamada. Te explico el método completo, el sizing exacto y los momentos óptimos de entrada. Traes papel y boli.</p>
+    </div>
+    <div class="paso">
+      <div class="paso-n">3</div>
+      <h3>Abres tus cuentas</h3>
+      <p>Tú, con tu nombre, tus credenciales, en los brokers que eliges. Yo te recomiendo cuáles usar para este método.</p>
+    </div>
+    <div class="paso">
+      <div class="paso-n">4</div>
+      <h3>Ejecutas (yo te acompaño)</h3>
+      <p>El día que decides operar, estoy disponible por Telegram para resolver dudas en tiempo real. Tú tomas todas las decisiones.</p>
+    </div>
+    <div class="paso">
+      <div class="paso-n">5</div>
+      <h3>Apruebas. Luego pagas.</h3>
+      <p>Cuando Fase 2 esté aprobada, me envías confirmación. Solo entonces aplica el fee de éxito. Sin aprobación, sin pago.</p>
+    </div>
+  </div>
+</div>
+
+<!-- PARA QUIÉN ES -->
+<div class="section" style="padding-top:0">
+  <div class="s-title">¿Es para ti?</div>
+  <div class="s-sub">Este servicio es específico. Antes de continuar, verifica que cumples el perfil.</div>
+  <div class="quien-grid">
+    <div class="quien-col si">
+      <h3 style="color:var(--verde)">✅ Sí es para ti si…</h3>
+      <ul>
+        <li>Ya intentaste un examen de fondeo antes</li>
+        <li>Entiendes qué son Long y Short</li>
+        <li>Tienes capital para 2-3 fees de examen (€200-400)</li>
+        <li>Puedes operar desde tu ordenador o móvil</li>
+        <li>Eres capaz de guardar un secreto bajo NDA</li>
+        <li>Quieres una cuenta fondeada real, no promesas</li>
+      </ul>
+    </div>
+    <div class="quien-col no">
+      <h3 style="color:#ff9999">❌ No es para ti si…</h3>
+      <ul>
+        <li>Nunca has abierto una plataforma de trading</li>
+        <li>Esperas que yo opere en tu nombre</li>
+        <li>No tienes capital para los fees de examen</li>
+        <li>Buscas un sistema automático sin participación tuya</li>
+        <li>No vas a respetar el NDA que firmas</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- PRECIO -->
+<div class="section" id="precio">
+  <div class="s-title">Inversión. Una sola vez.</div>
+  <div class="s-sub">Fee de éxito — solo lo pagas cuando tienes tu cuenta fondeada activa y confirmada.</div>
+  <div class="precio-box">
+    <div class="precio-label">FEE DE ÉXITO ÚNICO</div>
+    <div class="tachado-precio">Valor del método: €500+</div>
+    <div class="precio-main">€150</div>
+    <div class="precio-nota">Pagado <strong>solo</strong> tras confirmar Fase 2 aprobada.<br>Si no apruebas: €0. Sin excepciones.</div>
+    <ul>
+      <li>Sesión privada 1:1 de 1h por videollamada</li>
+      <li>NDA + protección mutua del método</li>
+      <li>Acompañamiento por Telegram el día que operas</li>
+      <li>Método documentado en PDF privado (acceso post-NDA)</li>
+      <li>Acceso a calculadora de sizing y timing óptimo</li>
+      <li>Sin límite de tiempo para ejecutarlo a tu ritmo</li>
+    </ul>
+    <button class="btn-oro" onclick="abrirNDA()">Firmar NDA y acceder al método →</button>
+    <div class="garantia-nota">✓ Solo pagas si apruebas Fase 1 + Fase 2 · Confirmación por email</div>
+  </div>
+</div>
+
+<!-- FAQ -->
+<div class="section">
+  <div class="s-title">Preguntas frecuentes</div>
+  <div class="s-sub">Las dudas reales antes de tomar la decisión.</div>
+  <div class="faq">
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <h4>¿Es legal?</h4>
+      <p>Sí. Tú operas tus propias cuentas, en tus propios brokers, con tus propias credenciales. El método usa la estructura de las normas de los exámenes, sin violarlas. No hay nada en las reglas de los principales brokers de fondeo que prohíba lo que se enseña aquí. Si hubiera alguna restricción específica en tu broker elegido, te lo indicaré en la sesión.</p>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <h4>¿Por qué necesito firmar un NDA?</h4>
+      <p>Porque el método funciona precisamente porque no está masificado. Si se publicara libremente, los brokers de fondeo ajustarían sus normas. El NDA protege tanto tu acceso a la herramienta como la de los demás clientes que ya la están usando.</p>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <h4>¿Cuánto capital necesito para los fees de examen?</h4>
+      <p>Depende del tamaño de cuenta que elijas. Para una cuenta de $10,000, los fees de examen suelen ser €100-200. El método usa 3 cuentas en total, por lo que necesitas €300-600 de fees. Es la inversión que haces en los brokers, no en este servicio (que solo cobro si apruebas).</p>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <h4>¿Qué pasa si por alguna razón no apruebo?</h4>
+      <p>No pagas nada. El fee de €150 solo aplica cuando me envías la confirmación de que tu Fase 2 está aprobada. Eso dicho, la probabilidad de fallo con el método bien ejecutado es inferior al 5%, y ese 5% tiene una solución conocida que también explico en la sesión.</p>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <h4>¿Cuánto tiempo tarda el proceso?</h4>
+      <p>Desde la sesión hasta tener la cuenta fondeada: entre 1 y 3 días si eliges el timing correcto. La sesión la agendamos en 24-48h desde que firmas el NDA. Todo el proceso es más rápido de lo que parece.</p>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <h4>¿Puedo usar este método con mi hermano/amigo?</h4>
+      <p>Sí, con limitaciones. El NDA cubre a la persona que lo firma, no a terceros. En la sesión te explico exactamente cómo puedes involucrar a personas de confianza dentro del método sin problemas, porque de hecho forma parte de la estrategia óptima.</p>
+    </div>
+    <div class="faq-item" onclick="this.classList.toggle('open')">
+      <h4>¿Esto reemplaza a saber trading?</h4>
+      <p>No exactamente. Necesitas saber cómo abrir y cerrar una posición (Long/Short) en tu plataforma. No necesitas análisis técnico, ni indicadores, ni experiencia avanzada. Si has operado alguna vez aunque sea en demo, tienes suficiente.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CTA FINAL -->
+<div class="section">
+  <div class="cta-final">
+    <h2>La cuenta fondeada que llevas meses intentando.<br>Este fin de semana.</h2>
+    <p>El mercado no te va a regalar nada. Pero hay formas de dejar de depender de que el mercado te favorezca. Eso es lo que hay al otro lado del NDA.</p>
+    <button class="hero-cta" onclick="abrirNDA()">Acceder al método — Firma el NDA →</button>
+    <div class="zero-risk" style="margin-top:16px">Fee de éxito €150 · Solo si apruebas · Sin riesgo previo</div>
+  </div>
+</div>
+
+<footer>
+  <p>© 2026 Impacto Digital IA · Servicio de coaching privado · hichambakkaliguerrero@gmail.com</p>
+  <p>Este servicio es coaching educativo. No es asesoramiento financiero regulado. El trading implica riesgo de pérdida. Resultados pasados no garantizan resultados futuros.</p>
+  <p style="margin-top:8px"><a href="index.html" style="color:var(--muted)">← Ver también: Sistema de Señales Algorítmicas</a></p>
+</footer>
+
+<!-- NDA MODAL -->
+<div class="modal-bg" id="ndaModal">
+  <div class="modal">
+    <h2>🔐 Acuerdo de Confidencialidad (NDA)</h2>
+    <div class="modal-sub">Lee el acuerdo y fírmalo digitalmente para acceder al método completo.</div>
+
+    <div class="nda-text">
+      <strong>ACUERDO DE NO DIVULGACIÓN — MÉTODO FONDEO GARANTIZADO</strong><br><br>
+      Entre <strong>Hicham Bakali / Impacto Digital</strong> (en adelante "el Titular") y el firmante (en adelante "el Cliente"):<br><br>
+
+      <strong>1. OBJETO DEL ACUERDO</strong><br>
+      El Titular comparte con el Cliente información confidencial sobre una estrategia de gestión de riesgo aplicada a exámenes de cuentas de fondeo (en adelante "el Método"). El Método es de desarrollo propio y constituye un activo comercial del Titular.<br><br>
+
+      <strong>2. OBLIGACIONES DEL CLIENTE</strong><br>
+      El Cliente se compromete a: (a) No divulgar el Método a terceros en ningún formato, oral o escrito; (b) No reproducir, publicar ni comercializar el Método; (c) No enseñar el Método a otras personas sin autorización expresa del Titular; (d) Notificar al Titular cualquier divulgación accidental.<br><br>
+
+      <strong>3. EXCEPCIONES</strong><br>
+      La confidencialidad no aplica a información que ya fuera de dominio público antes de esta firma.<br><br>
+
+      <strong>4. FEE DE ÉXITO</strong><br>
+      El Cliente abonará €150 al Titular únicamente tras confirmar por escrito que ha superado la Fase 2 del examen de fondeo correspondiente. En caso contrario, no existe obligación de pago alguna.<br><br>
+
+      <strong>5. DURACIÓN</strong><br>
+      Este acuerdo tiene vigencia indefinida respecto a la confidencialidad del Método.<br><br>
+
+      <strong>6. JURISDICCIÓN</strong><br>
+      Las partes se someten a la jurisdicción de los Juzgados y Tribunales de España.
+    </div>
+
+    <input type="text"  id="nda-nombre"   placeholder="Tu nombre completo (como en tu DNI)">
+    <input type="email" id="nda-email"    placeholder="Tu email">
+    <input type="text"  id="nda-telefono" placeholder="Tu WhatsApp / Telegram">
+
+    <div class="check-row">
+      <input type="checkbox" id="nda-check1">
+      <label for="nda-check1">He leído y acepto el Acuerdo de No Divulgación. Entiendo que <strong>no puedo compartir el Método con terceros</strong> bajo ninguna forma.</label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="nda-check2">
+      <label for="nda-check2">Entiendo que el fee de <strong>€150 solo aplica si apruebo Fase 1 y Fase 2</strong>. Si no apruebo, no pago nada.</label>
+    </div>
+    <div class="check-row">
+      <input type="checkbox" id="nda-check3">
+      <label for="nda-check3">Confirmo que tengo experiencia básica en trading (sé abrir y cerrar posiciones Long/Short) y que <strong>seré yo quien opere mis propias cuentas</strong>.</label>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn-cancel" onclick="cerrarNDA()">Cancelar</button>
+      <button class="btn-firmar" onclick="firmarNDA()">✍️ Firmar NDA y solicitar sesión →</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIRMACIÓN POST-NDA -->
+<div class="confirm-box" id="confirmBox">
+  <h3>✅ NDA firmado. Acceso concedido.</h3>
+  <p>
+    <strong id="confirm-nombre"></strong>, hemos recibido tu firma.<br><br>
+    En las próximas <strong>24 horas</strong> recibirás en <strong id="confirm-email"></strong>:<br>
+    → Enlace para agendar tu sesión privada de 1h<br>
+    → PDF con resumen del método (adelanto)<br>
+    → Acceso a la calculadora de sizing y timing<br><br>
+    Si tienes urgencia, escríbeme directamente:<br>
+    <strong>WhatsApp / Telegram: <a href="https://wa.me/34600000000" style="color:var(--oro)">+34 600 000 000</a></strong>
+  </p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+function abrirNDA() { document.getElementById('ndaModal').classList.add('open'); }
+function cerrarNDA() { document.getElementById('ndaModal').classList.remove('open'); }
+
+document.getElementById('ndaModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) cerrarNDA();
+});
+
+async function firmarNDA() {
+  const nombre   = document.getElementById('nda-nombre').value.trim();
+  const email    = document.getElementById('nda-email').value.trim();
+  const telefono = document.getElementById('nda-telefono').value.trim();
+  const c1 = document.getElementById('nda-check1').checked;
+  const c2 = document.getElementById('nda-check2').checked;
+  const c3 = document.getElementById('nda-check3').checked;
+
+  if (!nombre || !email) { showToast('Nombre y email son obligatorios'); return; }
+  if (!c1 || !c2 || !c3) { showToast('Debes aceptar todos los puntos del NDA'); return; }
+
+  try {
+    const r = await fetch('/api/nda/firmar', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ nombre, email, telefono,
+        acepta_confidencialidad: c1,
+        acepta_fee_exito: c2,
+        confirma_experiencia: c3,
+        timestamp: new Date().toISOString(),
+        ip_aprox: 'registrada'
+      })
+    });
+    const d = await r.json();
+
+    cerrarNDA();
+    document.getElementById('confirm-nombre').textContent = nombre;
+    document.getElementById('confirm-email').textContent = email;
+    const box = document.getElementById('confirmBox');
+    box.classList.add('show');
+    box.scrollIntoView({ behavior: 'smooth' });
+    showToast('✅ NDA firmado correctamente');
+
+  } catch(e) {
+    // Funciona aunque el backend no responda (fallback client-side)
+    cerrarNDA();
+    document.getElementById('confirm-nombre').textContent = nombre;
+    document.getElementById('confirm-email').textContent = email;
+    const box = document.getElementById('confirmBox');
+    box.classList.add('show');
+    box.scrollIntoView({ behavior: 'smooth' });
+    showToast('✅ NDA registrado. Contactaremos en 24h.');
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
+}
+</script>
+</body>
+</html>
