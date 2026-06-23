@@ -9,6 +9,18 @@ from agents.agent5_ejecutor   import EjecutorOrdenes
 from agents.agent6_vigilante  import VigianteTrade
 from datetime import datetime
 
+try:
+    from vix_filter      import evaluar_vix
+    from telegram_alerts import alerta_senal, alerta_cierre, alerta_circuit_breaker, alerta_resumen_diario
+    _EXTRAS_OK = True
+except ImportError:
+    _EXTRAS_OK = False
+    def evaluar_vix(): return {"operar": True, "factor_size": 1.0, "nivel": "NORMAL", "mensaje": "VIX no disponible"}
+    def alerta_senal(o): pass
+    def alerta_cierre(t, r, m=""): pass
+    def alerta_circuit_breaker(p, c): pass
+    def alerta_resumen_diario(s): pass
+
 class OrquestadorTrading:
     def __init__(self, capital=10000.0, modo="paper"):
         self.capital = capital
@@ -30,6 +42,15 @@ class OrquestadorTrading:
         t0 = datetime.now()
         ordenes = 0
         print(f"[{t0.strftime('%H:%M:%S')}] Iniciando ciclo...\n")
+
+        # VIX FILTER — el mejor trader no opera en pánico
+        vix_estado = evaluar_vix()
+        print(f"[0/6] VIX: {vix_estado['mensaje']}")
+        if not vix_estado["operar"]:
+            alerta_circuit_breaker(0, self.capital)
+            print("  Sistema en pausa por condiciones de mercado extremas.")
+            return 0
+        factor_vix = vix_estado["factor_size"]
 
         print("[1/6] Escaneando patrones...")
         patrones = self.scanner.escanear_todos()
@@ -63,12 +84,19 @@ class OrquestadorTrading:
             if not resultado.ok:
                 print(f"  ❌ {resultado.mensaje}"); continue
 
+            # Aplicar factor VIX al tamaño si hay precaución
+            if factor_vix < 1.0:
+                orden.tamano_posicion = round(orden.tamano_posicion * factor_vix, 4)
+                orden.capital_en_riesgo = round(orden.capital_en_riesgo * factor_vix, 2)
+                print(f"  ⚠️ Tamaño reducido al {factor_vix*100:.0f}% por VIX elevado")
+
             self.gestor.registrar_apertura(orden)
             self.posiciones_abiertas.append({
                 "ticker": patron.ticker, "direccion": patron.direccion,
                 "precio_entrada": orden.precio_entrada,
                 "stop_loss": orden.stop_loss, "take_profit": orden.take_profit
             })
+            alerta_senal(orden)  # Telegram a suscriptores
             print(f"  ✅ ORDEN EJECUTADA | ID: {resultado.order_id}")
             ordenes += 1
 
@@ -79,6 +107,7 @@ class OrquestadorTrading:
                 if estado.accion == "cerrar":
                     self.posiciones_abiertas = [p for p in self.posiciones_abiertas if p['ticker'] != estado.ticker]
                     self.gestor.registrar_cierre(estado.ticker, estado.pnl_actual)
+                    alerta_cierre(estado.ticker, estado.pnl_actual, estado.estado)
 
         seg = int((datetime.now()-t0).total_seconds())
         print(f"\n[Ciclo completado en {seg}s | Órdenes: {ordenes}]\n")

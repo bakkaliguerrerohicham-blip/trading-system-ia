@@ -404,6 +404,61 @@ def _cuenta_dict(c: models.CuentaFondeo) -> dict:
     }
 
 
+# ══════════════════════════════════════════════════════════════════════════════
+# TRIAL GRATUITO — 30 días sin tarjeta
+# ══════════════════════════════════════════════════════════════════════════════
+
+class TrialIn(BaseModel):
+    nombre: str
+    email: str
+    telegram_id: str = ""
+
+@app.post("/api/trial", tags=["suscripciones"])
+def activar_trial(data: TrialIn, db: Session = Depends(get_db)):
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    try:
+        from suscripciones import registrar_trial
+        result = registrar_trial(data.email, data.nombre, data.telegram_id)
+        return result
+    except Exception as e:
+        # Fallback: crear usuario en la DB propia si suscripciones.py no disponible
+        existing = db.query(models.Usuario).filter(models.Usuario.email == data.email).first()
+        if not existing:
+            import secrets
+            user = models.Usuario(
+                email=data.email,
+                nombre=data.nombre,
+                password_hash=auth.hash_password(secrets.token_hex(16)),
+                plan="trial"
+            )
+            db.add(user); db.commit()
+        from datetime import timedelta
+        vence = (datetime.now() + timedelta(days=30)).strftime("%d/%m/%Y")
+        return {"activo": True, "email": data.email, "plan": "trial", "vence": vence, "dias_restantes": 30}
+
+@app.get("/api/trial/verificar", tags=["suscripciones"])
+def verificar_trial(email: str, db: Session = Depends(get_db)):
+    import sys
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    try:
+        from suscripciones import verificar_acceso
+        return verificar_acceso(email)
+    except:
+        user = db.query(models.Usuario).filter(models.Usuario.email == email).first()
+        if not user:
+            return {"acceso": False, "razon": "No registrado"}
+        return {"acceso": True, "email": email, "plan": user.plan or "trial"}
+
+@app.get("/api/suscriptores", tags=["suscripciones"])
+def listar_suscriptores_api():
+    try:
+        from suscripciones import listar_suscriptores
+        return {"suscriptores": listar_suscriptores()}
+    except Exception as e:
+        return {"error": str(e)}
+
+
 # ── Entry point ───────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     import uvicorn
